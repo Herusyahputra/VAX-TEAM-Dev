@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LoRA Training - LTX-2 Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Base styles */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0A0C15;
+            color: #FFFFFF;
+        }
+        .gradient-bg {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(circle at 20% 30%, rgba(75, 0, 255, 0.15) 0%, transparent 50%);
+            z-index: -2;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 40px; }
+        .navbar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 0; background: rgba(10, 12, 21, 0.8); backdrop-filter: blur(10px);
+        }
+        .logo {
+            font-size: 28px; font-weight: 800;
+            background: linear-gradient(135deg, #FFFFFF, #A0A0FF);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .back-home { color: #9B9BFF; text-decoration: none; }
+        .workspace {
+            background: rgba(20, 25, 40, 0.6); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 48px;
+            padding: 40px; margin: 40px 0;
+        }
+        .input-label {
+            color: #9B9BFF; font-size: 14px; font-weight: 600;
+            margin-bottom: 16px; text-transform: uppercase;
+        }
+        .lora-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin: 30px 0;
+        }
+        .upload-area {
+            background: rgba(0,0,0,0.3);
+            border: 2px dashed rgba(255,255,255,0.2);
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .upload-area:hover {
+            border-color: #4A4AFF;
+            background: rgba(74,74,255,0.05);
+        }
+        .upload-area i {
+            font-size: 48px;
+            color: #9B9BFF;
+            margin-bottom: 16px;
+        }
+        .training-panel {
+            background: rgba(0,0,0,0.2);
+            border-radius: 24px;
+            padding: 30px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(90deg, #4A4AFF, #FF4AFF);
+            border-radius: 4px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.8; }
+            50% { opacity: 1; }
+            100% { opacity: 0.8; }
+        }
+        .image-preview {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .preview-thumb {
+            aspect-ratio: 1;
+            background: #151A28;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #4A4AFF, #9B4DFF);
+            border: none; color: white; padding: 12px 24px;
+            border-radius: 40px; font-weight: 600; cursor: pointer;
+            margin-right: 12px;
+        }
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white; padding: 12px 24px;
+            border-radius: 40px; font-weight: 600; cursor: pointer;
+        }
+        .footer { padding: 40px 0; text-align: center; color: rgba(255,255,255,0.5); }
+    </style>
+</head>
+<body>
+    <div class="gradient-bg"></div>
+    <div class="container">
+        <nav class="navbar">
+            <div class="logo">LTX-2STUDIO</div>
+            <div>
+                <a href="index.html" class="back-home"><i class="fas fa-arrow-left"></i> Back to Home</a>
+            </div>
+        </nav>
+
+        <div class="workspace">
+            <h1 style="font-size: 36px; margin-bottom: 30px; background: linear-gradient(135deg, #fff, #a0a0ff); -webkit-background-clip: text;">LoRA Training</h1>
+            
+            <div class="input-label"><i class="fas fa-microchip"></i> CUSTOM MODEL TRAINING</div>
+            
+            <div class="lora-grid">
+                <div>
+                    <div class="upload-area" id="uploadArea" onclick="simulateUpload()">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h3>Upload Training Images</h3>
+                        <p>10-30 images of your character or style</p>
+                        <p style="color: #9B9BFF; margin-top: 16px;">JPG, PNG, WEBP</p>
+                    </div>
+                    
+                    <div class="image-preview">
+                        <div class="preview-thumb"><i class="fas fa-image" style="opacity:0.3;"></i></div>
+                        <div class="preview-thumb"><i class="fas fa-image" style="opacity:0.3;"></i></div>
+                        <div class="preview-thumb"><i class="fas fa-image" style="opacity:0.3;"></i></div>
+                        <div class="preview-thumb"><i class="fas fa-image" style="opacity:0.3;"></i></div>
+                        <div class="preview-thumb"><i class="fas fa-image" style="opacity:0.3;"></i></div>
+                        <div class="preview-thumb"><i class="fas fa-plus" style="opacity:0.3;"></i></div>
+                    </div>
+                </div>
+
+                <div class="training-panel">
+                    <h3 style="margin-bottom: 20px;">Training Progress</h3>
+                    <p>Model: character_style_v1</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <p style="color: rgba(255,255,255,0.5);">60% complete • 15 min remaining</p>
+                    
+                    <div style="display: flex; gap: 16px; margin-top: 30px;">
+                        <button class="btn-primary"><i class="fas fa-play"></i> Start</button>
+                        <button class="btn-secondary"><i class="fas fa-pause"></i> Pause</button>
+                        <button class="btn-secondary"><i class="fas fa-stop"></i> Stop</button>
+                    </div>
+
+                    <div style="margin-top: 30px;">
+                        <h4>Training Settings</h4>
+                        <p style="color: rgba(255,255,255,0.5); margin-top: 10px;">Batch Size: 4 | Learning Rate: 1e-4 | Epochs: 100</p>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-primary" style="width: 100%; margin-top: 20px;" onclick="startTraining()">Train Custom LoRA</button>
+        </div>
+
+        <footer class="footer">
+            <p>© 2026 LTX-2 Studio - LoRA Training Feature</p>
+        </footer>
+    </div>
+
+    <script>
+        function simulateUpload() {
+            document.getElementById('uploadArea').innerHTML = `
+                <i class="fas fa-check-circle" style="font-size: 48px; color: #4AFF4A;"></i>
+                <h3>15 images uploaded!</h3>
+                <p>character_reference.zip • 45 MB</p>
+            `;
+        }
+
+        function startTraining() {
+            alert('LoRA training started! This will take approximately 15 minutes. (Demo)');
+        }
+    </script>
+</body>
+</html>

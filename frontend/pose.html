@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pose Control - LTX-2 Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Base styles */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0A0C15;
+            color: #FFFFFF;
+        }
+        .gradient-bg {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(circle at 20% 30%, rgba(75, 0, 255, 0.15) 0%, transparent 50%);
+            z-index: -2;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 40px; }
+        .navbar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 0; background: rgba(10, 12, 21, 0.8); backdrop-filter: blur(10px);
+        }
+        .logo {
+            font-size: 28px; font-weight: 800;
+            background: linear-gradient(135deg, #FFFFFF, #A0A0FF);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .back-home { color: #9B9BFF; text-decoration: none; }
+        .workspace {
+            background: rgba(20, 25, 40, 0.6); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 48px;
+            padding: 40px; margin: 40px 0;
+        }
+        .input-label {
+            color: #9B9BFF; font-size: 14px; font-weight: 600;
+            margin-bottom: 16px; text-transform: uppercase;
+        }
+        .pose-editor {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+        .pose-canvas {
+            background: #151A28;
+            border-radius: 20px;
+            padding: 20px;
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+        }
+        .pose-canvas svg {
+            width: 100%;
+            height: 100%;
+        }
+        .pose-point {
+            fill: #4A4AFF;
+            cursor: pointer;
+            transition: r 0.2s;
+        }
+        .pose-point:hover {
+            r: 8;
+            fill: #FF4AFF;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #4A4AFF, #9B4DFF);
+            border: none; color: white; padding: 16px 40px;
+            border-radius: 40px; font-weight: 600; cursor: pointer;
+            width: 100%; margin-top: 20px;
+        }
+        .pose-gallery {
+            display: flex;
+            gap: 16px;
+            margin: 30px 0;
+            justify-content: center;
+        }
+        .pose-thumb {
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+        .pose-thumb:hover {
+            border-color: #4A4AFF;
+        }
+        .footer { padding: 40px 0; text-align: center; color: rgba(255,255,255,0.5); }
+    </style>
+</head>
+<body>
+    <div class="gradient-bg"></div>
+    <div class="container">
+        <nav class="navbar">
+            <div class="logo">LTX-2STUDIO</div>
+            <div>
+                <a href="index.html" class="back-home"><i class="fas fa-arrow-left"></i> Back to Home</a>
+            </div>
+        </nav>
+
+        <div class="workspace">
+            <h1 style="font-size: 36px; margin-bottom: 30px; background: linear-gradient(135deg, #fff, #a0a0ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">OpenPose Control</h1>
+            
+            <div class="input-label"><i class="fas fa-child"></i> POSE EDITOR</div>
+            
+            <div class="pose-editor">
+                <div class="pose-canvas">
+                    <svg viewBox="0 0 200 200">
+                        <!-- Simple stick figure -->
+                        <circle cx="100" cy="50" r="10" fill="#4A4AFF" opacity="0.8" class="pose-point"/>
+                        <!-- Spine -->
+                        <line x1="100" y1="60" x2="100" y2="120" stroke="#9B9BFF" stroke-width="3"/>
+                        <!-- Arms -->
+                        <line x1="100" y1="80" x2="60" y2="100" stroke="#9B9BFF" stroke-width="3"/>
+                        <line x1="100" y1="80" x2="140" y2="100" stroke="#9B9BFF" stroke-width="3"/>
+                        <!-- Legs -->
+                        <line x1="100" y1="120" x2="70" y2="170" stroke="#9B9BFF" stroke-width="3"/>
+                        <line x1="100" y1="120" x2="130" y2="170" stroke="#9B9BFF" stroke-width="3"/>
+                        <!-- Joint points -->
+                        <circle cx="100" cy="80" r="5" fill="#FF4AFF" class="pose-point"/>
+                        <circle cx="60" cy="100" r="5" fill="#FF4AFF" class="pose-point"/>
+                        <circle cx="140" cy="100" r="5" fill="#FF4AFF" class="pose-point"/>
+                        <circle cx="70" cy="170" r="5" fill="#FF4AFF" class="pose-point"/>
+                        <circle cx="130" cy="170" r="5" fill="#FF4AFF" class="pose-point"/>
+                    </svg>
+                    <p style="margin-top: 16px; color: rgba(255,255,255,0.5);">Drag points to adjust</p>
+                </div>
+                <div class="pose-canvas">
+                    <svg viewBox="0 0 200 200">
+                        <!-- Preview of generated pose -->
+                        <circle cx="100" cy="45" r="10" fill="#4A4AFF" opacity="0.8"/>
+                        <line x1="100" y1="55" x2="100" y2="115" stroke="#9B9BFF" stroke-width="3"/>
+                        <line x1="100" y1="75" x2="65" y2="90" stroke="#9B9BFF" stroke-width="3"/>
+                        <line x1="100" y1="75" x2="135" y2="90" stroke="#9B9BFF" stroke-width="3"/>
+                        <line x1="100" y1="115" x2="75" y2="160" stroke="#9B9BFF" stroke-width="3"/>
+                        <line x1="100" y1="115" x2="125" y2="160" stroke="#9B9BFF" stroke-width="3"/>
+                    </svg>
+                    <p style="margin-top: 16px; color: rgba(255,255,255,0.5);">Generated character</p>
+                </div>
+            </div>
+
+            <div class="input-label"><i class="fas fa-images"></i> PRESET POSES</div>
+            <div class="pose-gallery">
+                <div class="pose-thumb"><i class="fas fa-figure"></i></div>
+                <div class="pose-thumb"><i class="fas fa-running"></i></div>
+                <div class="pose-thumb"><i class="fas fa-hand-peace"></i></div>
+                <div class="pose-thumb"><i class="fas fa-hand-fist"></i></div>
+                <div class="pose-thumb"><i class="fas fa-person-walking"></i></div>
+            </div>
+
+            <button class="btn-primary" onclick="generateWithPose()">Generate with Pose</button>
+        </div>
+
+        <footer class="footer">
+            <p>© 2026 LTX-2 Studio - Pose Control Feature</p>
+        </footer>
+    </div>
+
+    <script>
+        function generateWithPose() {
+            alert('Pose applied! Generating video with custom pose... (Demo)');
+        }
+    </script>
+</body>
+</html>
