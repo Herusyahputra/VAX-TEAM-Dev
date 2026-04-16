@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # AI Text-to-Video Generator (LTX-Video)
 
 Sistem ini adalah **aplikasi web Text-to-Video berbasis AI** yang dirancang secara khusus untuk dapat dijalankan secara lokal pada PC/Laptop dengan spesifikasi **VRAM terbatas (seperti Nvidia RTX 3050 4GB)**.
@@ -82,3 +83,6 @@ USE_BFLOAT16 = True
 # Generation settings
 GUIDANCE_SCALE = 7.5
 NUM_INFERENCE_STEPS = 30
+=======
+# VAX-TEAM-Dev
+>>>>>>> upstream/main
