@@ -33,10 +33,10 @@ app.add_middleware(
 # Serve video output
 app.mount("/outputs", StaticFiles(directory=str(OUTPUT_DIR)), name="outputs")
 
-# Serve frontend (opsional, kalau ingin satu server)
-frontend_dir = Path(__file__).parent.parent / "frontend"
-if frontend_dir.exists():
-    app.mount("/app", StaticFiles(directory=str(frontend_dir), html=True), name="frontend")
+# Serve view/frontend (opsional, kalau ingin satu server)
+view_dir = Path(__file__).parent.parent / "view"
+if view_dir.exists():
+    app.mount("/app", StaticFiles(directory=str(view_dir), html=True), name="view")
 
 
 # ===== MODELS (Request/Response Schema) =====

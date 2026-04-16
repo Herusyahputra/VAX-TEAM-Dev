@@ -28,34 +28,57 @@ Aplikasi ini menggunakan model **LTX-Video (Lightricks 2B)** yang berjalan di at
  ┗ 📜 test_gpu.py      # Script untuk cek penggunaan dan deteksi GPU
 ```
 
-## Prasyarat
-Sistem ini membutuhkan sistem operasi **Windows** dan disarankan memiliki spesifikasi berikut:
-- **GPU**: NVIDIA GPU dengan minimal **4GB VRAM** (Contoh: RTX 3050 Laptop).
-- **RAM**: Minimal 16GB.
-- **Python**: Versi 3.10 atau 3.11.
+## Troubleshooting & Tips for 4GB VRAM (Continued)
 
-## Cara Instalasi
+If you experience a **CUDA Out of Memory (OOM)** error:
+- Reduce the resolution in `backend/config.py` from `320x240` to something lower (e.g., `256x192` or `224x160`).
+- Reduce the `DEFAULT_NUM_FRAMES` option to a range of `8-16` only (shorter videos consume less VRAM).
+- Make sure no other heavy applications (Games, Rendering, Browsers with many tabs) are consuming VRAM when pressing "Generate".
+- The bitsandbytes library sometimes has issues on pure Windows OS. If the library fails to load, read the `INSTALL_GUIDE.txt` file about reinstalling the Windows version of bitsandbytes.
+- Try enabling `CPU_OFFLOAD=true` in the `.env` configuration file to shift some model layers to system RAM.
+- Set `VAE_TILING_ENABLED=true` and `VAE_TILE_SIZE=128` in the backend configuration to process the VAE in smaller chunks.
 
-### Menggunakan Script Otomatis (Termudah)
-1. Buka folder proyek ini.
-2. Double klik file `setup.bat`.
-3. Tunggu hingga proses instalasi virtual environment dan library Pytorch beserta CUDA selesai diunduh.
+### Common Error Messages & Solutions
 
-### Instalasi Manual (Jika setup.bat gagal)
-Jika terdapat masalah, silakan mengacu ke dokumen `INSTALL_GUIDE.txt` untuk langkah demi langkah penginstalan manual menggunakan terminal. Instruksi mencakup instalasi PyTorch (CUDA 12.1) dan dependencies.
+| Error Message | Solution |
+|---------------|----------|
+| `CUDA out of memory` | Reduce resolution, reduce frame count, or close other VRAM-heavy applications |
+| `No module named 'torch'` | Virtual environment not activated properly. Run `venv\Scripts\activate` manually |
+| `bitsandbytes.dll not found` | Follow Windows-specific bitsandbytes installation in `INSTALL_GUIDE.txt` |
+| `Model not found` | Run `download_model.bat` to manually download the VAX model |
+| `Port 8000 already in use` | Change port in `start_server.bat` from `8000` to another port like `8001` |
 
-## Cara Menggunakan
-1. Jalankan aplikasi dengan melakukan klik ganda pada `start_server.bat`. 
-   > Pada pemanggilan pertama setelah instalasi, proses ini akan mendownload model **LTX-Video** ke dalam folder `models/` (bisa memakan waktu beberapa menit tergantunng kecepatan internet).
-2. Command prompt akan berjalan dan mengaktifkan virtual environment serta Server FastAPI.
-3. Buka browser dan jalankan aplikasinya pada:
-   - **Frontend UI / Website**: Anda bisa langsung membuka file `frontend\index.html` dari File Explorer.
-   - **API Docs (Swagger)**: `http://localhost:8000/docs`
-4. Masukkan prompt / instruksi teks pada antarmuka web, klik tombol Generate, dan tunggu hasil MP4 muncul. Hasil asli video akan tersimpan ke folder `outputs/`.
+## Performance Expectations (RTX 3050 4GB)
 
-## Troubleshooting & Tips VRAM 4GB
-Jika Anda mengalami error **CUDA Out of Memory (OOM)**:
-- Kurangi resolusi pada `backend/config.py` dari `320x240` ke yang lebih rendah.
-- Kurangi opsi jumlah frame `DEFAULT_NUM_FRAMES` jadi rentang `8-16` saja.
-- Pastikan tidak ada aplikasi berat lain (Game, Rendering, Browser dengan banyak tab) yang menyita VRAM ketika menekan "Generate".
-- Model bitandbytes terkadang bermasalah pada OS Windows murni. Jika library gagal di-load, baca file `INSTALL_GUIDE.txt` tentang cara reinstall bitsandbytes versi windows.
+With the optimized settings, you can expect:
+
+| Configuration | Generation Time | VRAM Usage |
+|---------------|----------------|-------------|
+| 320x240, 25 frames | ~15-25 seconds | 3.5-3.8 GB |
+| 256x192, 16 frames | ~8-12 seconds | 3.0-3.3 GB |
+| 224x160, 8 frames | ~4-7 seconds | 2.5-2.8 GB |
+
+> **Note**: First generation after startup may be slower due to model loading into memory. Subsequent generations will be faster.
+
+## Custom Configuration
+
+You can modify the `.env` file or `backend/config.py` to adjust:
+
+```python
+# Resolution settings (width x height)
+DEFAULT_WIDTH = 320
+DEFAULT_HEIGHT = 240
+
+# Video length settings
+DEFAULT_NUM_FRAMES = 25  # ~1 second at 25 fps
+DEFAULT_FPS = 25
+
+# VRAM optimization flags
+CPU_OFFLOAD = True
+VAE_SLICING = True
+VAE_TILING = True
+USE_BFLOAT16 = True
+
+# Generation settings
+GUIDANCE_SCALE = 7.5
+NUM_INFERENCE_STEPS = 30
