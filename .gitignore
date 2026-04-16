@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.env
+
+# Models and Large Files
+models/
+outputs/
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+
+# OS and IDE
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Project Specific
+.cmd/
+tempCodeRunnerFile.bat
