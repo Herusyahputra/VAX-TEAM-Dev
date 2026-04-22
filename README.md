@@ -1,79 +1,98 @@
+<<<<<<< Updated upstream
 <<<<<<< HEAD
 # AI Text-to-Video Generator (LTX-Video)
+=======
+# 🎬 VAX-STUDIO: Hybrid AI Video Generation Pipeline
+>>>>>>> Stashed changes
 
-Sistem ini adalah **aplikasi web Text-to-Video berbasis AI** yang dirancang secara khusus untuk dapat dijalankan secara lokal pada PC/Laptop dengan spesifikasi **VRAM terbatas (seperti Nvidia RTX 3050 4GB)**.
+**VAX-STUDIO** is a high-performance, hybrid AI video generation system that combines a local **FastAPI MVC Controller** with a cloud-based **Google Colab GPU Engine**. It allows users to generate high-quality AI images and animate them into cinematic videos (up to 10 seconds) using cutting-edge models like Stable Diffusion and Stable Video Diffusion.
 
-Aplikasi ini menggunakan model **LTX-Video (Lightricks 2B)** yang berjalan di atas framework **FastAPI** (Backend) dan **Vanilla HTML/CSS/JS** (Frontend).
+---
 
-## Fitur Utama
-- 🚀 **Optimasi VRAM (4GB)**: Menggunakan CPU Offloading, VAE Slicing, VAE Tiling, dan tipe data `bfloat16` agar model dapat berjalan tanpa Out of Memory (OOM).
-- 🎬 **Text-to-Video**: Mampu menghasilkan video berdurasi singkat (~1 detik / 25 frame) pada resolusi 320x240 dengan inferensi cepat.
-- 💻 **Web Dashboard**: Antarmuka pengguna (UI) lokal yang intuitif untuk memasukkan prompt dan memonitor status generasi video secara real-time.
-- 🛠️ **Server Lokal**: Berjalan 100% offline secara lokal setelah model berhasil diunduh.
-- 📦 **Automated Scripts**: Dilengkapi dengan berbagai script `.bat` siap pakai untuk Windows (`setup.bat`, `start_server.bat`, `download_model.bat`).
+## ✨ Key Features
 
-## Struktur Proyek
-```text
-📦 model baru
- ┣ 📂 backend/         # Logika server FastAPI & Text-to-Video pipeline
- ┣ 📂 frontend/        # Web dashboard (UI)
- ┣ 📂 models/          # Tempat cache untuk model HuggingFace
- ┣ 📂 outputs/         # Hasil video yang dihasilkan (.mp4)
- ┣ 📂 venv/            # Python virtual environment (terbuat saat instalasi)
- ┣ 📜 .env             # Konfigurasi variabel lingkungan lokal
- ┣ 📜 INSTALL_GUIDE.txt# Instruksi instalasi manual lengkap
- ┣ 📜 download_model.bat # Script untuk mendownload model manual (jika butuh)
- ┣ 📜 requirements.txt # Daftar dependensi Python
- ┣ 📜 setup.bat        # Script untuk setup awal otomatis
- ┣ 📜 start_server.bat # Script untuk menyalakan web server & frontend
- ┗ 📜 test_gpu.py      # Script untuk cek penggunaan dan deteksi GPU
+- **🚀 Split-Pipeline Architecture**: Separate Text-to-Image (T2I) and Image-to-Video (I2V) workflows for maximum creative control.
+- **☁️ Cloud-Powered Rendering**: Offloads heavy GPU computations to Google Colab, keeping your local machine light and cool.
+- **📊 Real-Time Progress Tracking**: Visual progress bars show generation percentage in real-time.
+- **⏱️ Dynamic Duration**: Control video length from 2s up to 10s directly from the UI.
+- **🎨 Premium UI/UX**: Modern, glassmorphic frontend with dark mode and smooth animations.
+- **🗄️ MVC Backend**: Structured FastAPI backend with MySQL database integration for job management.
+
+---
+
+## 🛠️ Technology Stack
+
+| Component | Technology |
+| :--- | :--- |
+| **Local Backend** | Python, FastAPI, SQLAlchemy (Async), MySQL |
+| **Cloud Engine** | Google Colab (Tesla T4 GPU), Diffusers, PyTorch |
+| **Frontend** | HTML5, CSS3 (Vanilla), JavaScript (ES6+), FontAwesome |
+| **Communication** | Ngrok (Secure Tunneling), Aiohttp |
+| **AI Models** | Stable Diffusion v1.5, Stable Video Diffusion XT |
+
+---
+
+## 🏗️ Architecture Overview
+
+```mermaid
+graph LR
+    User((User)) -->|Browser| Frontend[Frontend UI]
+    Frontend -->|API Request| LocalAPI[Local FastAPI Controller]
+    LocalAPI -->|Save Job| DB[(MySQL Database)]
+    LocalAPI -->|Forward Task| Tunnel{Ngrok Tunnel}
+    Tunnel -->|Execute| Colab[Google Colab GPU Engine]
+    Colab -->|Status/Progress| LocalAPI
+    Colab -->|Download| LocalAPI
+    LocalAPI -->|Serve Results| Frontend
 ```
 
-## Troubleshooting & Tips for 4GB VRAM (Continued)
+---
 
-If you experience a **CUDA Out of Memory (OOM)** error:
-- Reduce the resolution in `backend/config.py` from `320x240` to something lower (e.g., `256x192` or `224x160`).
-- Reduce the `DEFAULT_NUM_FRAMES` option to a range of `8-16` only (shorter videos consume less VRAM).
-- Make sure no other heavy applications (Games, Rendering, Browsers with many tabs) are consuming VRAM when pressing "Generate".
-- The bitsandbytes library sometimes has issues on pure Windows OS. If the library fails to load, read the `INSTALL_GUIDE.txt` file about reinstalling the Windows version of bitsandbytes.
-- Try enabling `CPU_OFFLOAD=true` in the `.env` configuration file to shift some model layers to system RAM.
-- Set `VAE_TILING_ENABLED=true` and `VAE_TILE_SIZE=128` in the backend configuration to process the VAE in smaller chunks.
+## 🚀 Getting Started
 
-### Common Error Messages & Solutions
+### 1. Local Setup
+1.  **Clone the Repository**:
+    ```bash
+    git clone https://github.com/RamadanMufian/VAX-TEAM-Dev.git
+    cd VAX-TEAM-Dev
+    ```
+2.  **Environment Variables**:
+    Edit the `.env` file and set your `HF_TOKEN`, `DB_URL`, and `NGROK_TOKEN`.
+3.  **Run the Server**:
+    Execute the startup script:
+    ```bash
+    start_server.bat
+    ```
 
-| Error Message | Solution |
-|---------------|----------|
-| `CUDA out of memory` | Reduce resolution, reduce frame count, or close other VRAM-heavy applications |
-| `No module named 'torch'` | Virtual environment not activated properly. Run `venv\Scripts\activate` manually |
-| `bitsandbytes.dll not found` | Follow Windows-specific bitsandbytes installation in `INSTALL_GUIDE.txt` |
-| `Model not found` | Run `download_model.bat` to manually download the VAX model |
-| `Port 8000 already in use` | Change port in `start_server.bat` from `8000` to another port like `8001` |
+### 2. Google Colab Setup
+1.  Open the provided notebook link in Google Colab.
+2.  Paste the latest **VAX Engine v2.6** code into a cell.
+3.  Run the cell and wait for the `🚀 ENGINE READY! URL: https://xxxx.ngrok-free.app` message.
+4.  Copy that URL and update the `COLAB_API_URL` in your local `.env` file.
 
-## Performance Expectations (RTX 3050 4GB)
+---
 
-With the optimized settings, you can expect:
+## 📖 Usage Guide
 
-| Configuration | Generation Time | VRAM Usage |
-|---------------|----------------|-------------|
-| 320x240, 25 frames | ~15-25 seconds | 3.5-3.8 GB |
-| 256x192, 16 frames | ~8-12 seconds | 3.0-3.3 GB |
-| 224x160, 8 frames | ~4-7 seconds | 2.5-2.8 GB |
+1.  **Step 1 (Generate Image)**: Enter a detailed prompt (e.g., *"Cinematic cat running in a meadow"*) and click **Generate Image**.
+2.  **Preview**: Once the image appears, you can proceed to the next step or upload your own image.
+3.  **Step 2 (Animate)**: Set your desired duration (up to 10s) and click **Animate This Image!**.
+4.  **Download**: The video will appear in the UI and be saved automatically in the `outputs/` folder.
 
-> **Note**: First generation after startup may be slower due to model loading into memory. Subsequent generations will be faster.
+---
 
-## Custom Configuration
+## 🔧 Troubleshooting
 
-You can modify the `.env` file or `backend/config.py` to adjust:
+- **404 Not Found**: Ensure the Colab URL in `.env` matches the current Ngrok URL.
+- **CUDA OOM**: If Colab crashes, reduce the video duration or restart the Colab kernel.
+- **ImportError**: Ensure you are running the project within the `.venv` virtual environment.
 
-```python
-# Resolution settings (width x height)
-DEFAULT_WIDTH = 320
-DEFAULT_HEIGHT = 240
+---
 
-# Video length settings
-DEFAULT_NUM_FRAMES = 25  # ~1 second at 25 fps
-DEFAULT_FPS = 25
+## 📜 License
+This project is developed for **VAX-TEAM** developers. All rights reserved.
 
+<<<<<<< Updated upstream
 # VRAM optimization flags
 CPU_OFFLOAD = True
 VAE_SLICING = True
@@ -86,3 +105,7 @@ NUM_INFERENCE_STEPS = 30
 =======
 # VAX-TEAM-Dev
 >>>>>>> upstream/main
+=======
+---
+*Created with ❤️ by Antigravity AI*
+>>>>>>> Stashed changes

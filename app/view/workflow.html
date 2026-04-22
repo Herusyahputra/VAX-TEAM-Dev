@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Workflow: T2I -> I2V | VAX Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #03050A; color: #FFF; overflow-x: hidden; }
+        
+        /* Navbar (Same as index.html) */
+        nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1rem 5%; background: rgba(10, 15, 30, 0.8);
+            backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            position: fixed; width: 100%; top: 0; z-index: 100;
+        }
+        .logo { font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, #00FF88 0%, #00B8FF 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .nav-links { display: flex; gap: 2rem; }
+        .nav-links a { color: #A0AABF; text-decoration: none; font-weight: 500; transition: all 0.3s; }
+        .nav-links a:hover, .nav-links a.active { color: #FFF; text-shadow: 0 0 10px rgba(0, 255, 136, 0.5); }
+        
+        .container { max-width: 1200px; margin: 100px auto 40px; padding: 0 20px; }
+        .header { text-align: center; margin-bottom: 40px; }
+        .header h1 { font-size: 2.5rem; margin-bottom: 10px; }
+        .header p { color: #A0AABF; }
+
+        .workflow-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        @media (max-width: 768px) { .workflow-grid { grid-template-columns: 1fr; } }
+
+        .panel {
+            background: rgba(15, 20, 35, 0.6); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px; padding: 25px;
+        }
+        .panel h2 { font-size: 1.2rem; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .panel h2 .step-badge {
+            background: linear-gradient(135deg, #00FF88, #00B8FF); color: #000;
+            width: 28px; height: 28px; display: flex; justify-content: center; align-items: center;
+            border-radius: 50%; font-size: 0.9rem; font-weight: bold;
+        }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; color: #A0AABF; font-size: 0.9rem; }
+        textarea, input {
+            width: 100%; padding: 12px 15px; border-radius: 8px;
+            background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+            color: #FFF; font-family: 'Inter', sans-serif; resize: vertical;
+        }
+        textarea:focus, input:focus { outline: none; border-color: #00FF88; }
+        
+        .btn {
+            width: 100%; padding: 14px; border: none; border-radius: 8px;
+            font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.3s;
+            display: flex; justify-content: center; align-items: center; gap: 10px;
+        }
+        .btn-primary { background: linear-gradient(135deg, #00FF88, #00B8FF); color: #000; }
+        .btn-primary:hover { box-shadow: 0 0 20px rgba(0, 255, 136, 0.4); transform: translateY(-2px); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+        
+        .btn-secondary { background: rgba(255,255,255,0.1); color: #FFF; margin-top: 10px;}
+        .btn-secondary:hover { background: rgba(255,255,255,0.2); }
+
+        .preview-box {
+            width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 8px;
+            border: 1px dashed rgba(255,255,255,0.2); display: flex; justify-content: center; align-items: center;
+            margin-bottom: 20px; overflow: hidden; position: relative;
+        }
+        .preview-box img, .preview-box video { width: 100%; height: 100%; object-fit: cover; }
+        .placeholder-text { color: #555; font-size: 0.9rem; }
+
+        .loader {
+            border: 3px solid rgba(255,255,255,0.1); border-top: 3px solid #00FF88;
+            border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .status-text { margin-top: 15px; font-size: 0.9rem; color: #A0AABF; text-align: center; }
+        .divider { height: 1px; background: rgba(255,255,255,0.1); margin: 25px 0; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">VAX Studio</div>
+        <div class="nav-links">
+            <a href="index.html">Beranda</a>
+            <a href="workflow.html" class="active">AI Workflow</a>
+            <a href="text2video.html">Direct T2V</a>
+            <a href="colab.html">Colab Engine</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1>Pro Workflow</h1>
+            <p>Generasikan Gambar dahulu, lalu ubah Gambar pilihan Anda menjadi Video.</p>
+        </div>
+
+        <div class="workflow-grid">
+            
+            <!-- STEP 1: IMAGE -->
+            <div class="panel" id="step1-panel">
+                <h2><div class="step-badge">1</div> Text to Image</h2>
+                <div class="form-group">
+                    <label>Deskripsi Gambar (Prompt)</label>
+                    <textarea id="image-prompt" rows="4" placeholder="A futuristic cyberpunk city at night, neon lights, highly detailed, 8k resolution..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Seed (-1 = Random)</label>
+                    <input type="number" id="image-seed" value="-1">
+                </div>
+                <button id="btn-gen-image" class="btn btn-primary" onclick="generateImage()">
+                    <i class="fas fa-magic"></i> Generate Image
+                </button>
+
+                <div class="divider"></div>
+
+                <div class="preview-box" id="image-preview-box">
+                    <div class="placeholder-text" id="img-placeholder">Belum ada gambar</div>
+                    <img id="result-image" style="display: none;">
+                </div>
+                
+                <div id="image-status" class="status-text"></div>
+                
+                <div class="progress-container" id="image-progress-container" style="display: none; margin-top: 15px;">
+                    <div class="progress-bar" id="image-progress-bar" style="width: 0%; height: 10px; background: linear-gradient(90deg, #00FF88, #00B8FF); border-radius: 5px; transition: width 0.3s;"></div>
+                    <div style="text-align: right; font-size: 0.8rem; margin-top: 5px;" id="image-progress-text">0%</div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button id="btn-upload-img" class="btn btn-secondary" onclick="document.getElementById('file-upload').click()">
+                        <i class="fas fa-upload"></i> Upload Gambar Sendiri
+                    </button>
+                    <input type="file" id="file-upload" accept="image/*" style="display: none;" onchange="handleFileUpload(event)">
+                </div>
+            </div>
+
+            <!-- STEP 2: VIDEO -->
+            <div class="panel" id="step2-panel" style="opacity: 0.5; pointer-events: none;">
+                <h2><div class="step-badge">2</div> Image to Video</h2>
+                <p style="color: #A0AABF; font-size: 0.9rem; margin-bottom: 20px;">
+                    Gambar di samping akan dianimasikan oleh model AI SVD XT.
+                </p>
+                <div class="form-group">
+                    <label>Seed Animasi (-1 = Random)</label>
+                    <input type="number" id="video-seed" value="-1">
+                </div>
+                <div class="form-group">
+                    <label>Durasi Video (2 - 10 Detik)</label>
+                    <input type="range" id="video-duration" min="2" max="10" value="5" oninput="this.nextElementSibling.innerText = this.value + ' detik'">
+                    <span style="display: block; text-align: center; margin-top: 5px; color: #00FF88; font-weight: bold;">5 detik</span>
+                </div>
+                <button id="btn-gen-video" class="btn btn-primary" onclick="generateVideo()">
+                    <i class="fas fa-play"></i> Animate This Image!
+                </button>
+
+                <div class="progress-container" id="video-progress-container" style="display: none; margin-top: 15px;">
+                    <div class="progress-bar" id="video-progress-bar" style="width: 0%; height: 10px; background: linear-gradient(90deg, #00FF88, #00B8FF); border-radius: 5px; transition: width 0.3s;"></div>
+                    <div style="text-align: right; font-size: 0.8rem; margin-top: 5px;" id="video-progress-text">0%</div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="preview-box" id="video-preview-box">
+                    <div class="placeholder-text" id="vid-placeholder">Menunggu gambar...</div>
+                    <video id="result-video" controls loop style="display: none;"></video>
+                </div>
+                
+                <div id="video-status" class="status-text"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = "http://localhost:8000";
+        let currentBase64Image = null;
+
+        async function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result.split(',')[1]); // Ambil base64-nya saja
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        async function urlToBase64(url) {
+            const response = await fetch(url);
+            const blob = await response.blob();
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(blob);
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        function unlockStep2() {
+            const step2 = document.getElementById('step2-panel');
+            step2.style.opacity = '1';
+            step2.style.pointerEvents = 'auto';
+            document.getElementById('vid-placeholder').innerText = "Siap untuk dianimasikan";
+        }
+
+        async function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const imgUrl = URL.createObjectURL(file);
+            document.getElementById('result-image').src = imgUrl;
+            document.getElementById('result-image').style.display = 'block';
+            document.getElementById('img-placeholder').style.display = 'none';
+
+            // Convert to Base64 for Step 2
+            currentBase64Image = await fileToBase64(file);
+            unlockStep2();
+        }
+
+        async function generateImage() {
+            const prompt = document.getElementById('image-prompt').value.trim();
+            if(!prompt) return alert('Prompt tidak boleh kosong!');
+
+            const seed = document.getElementById('image-seed').value;
+            const btn = document.getElementById('btn-gen-image');
+            const statusDiv = document.getElementById('image-status');
+            const progressContainer = document.getElementById('image-progress-container');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<div class="loader"></div> Processing...';
+            document.getElementById('result-image').style.display = 'none';
+            document.getElementById('img-placeholder').style.display = 'block';
+            document.getElementById('img-placeholder').innerText = "Mengirim tugas ke Colab...";
+            
+            progressContainer.style.display = 'block';
+            updateProgressBar('image', 0);
+
+            try {
+                const res = await fetch(`${API_BASE}/jobs/generate_image`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ prompt, seed: parseInt(seed) || -1 })
+                });
+                
+                const data = await res.json();
+                if(data.success) {
+                    pollImageStatus(data.job_id);
+                } else {
+                    throw new Error("Gagal membuat tugas");
+                }
+            } catch (err) {
+                statusDiv.innerText = `Error: ${err.message}`;
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-magic"></i> Generate Image';
+                document.getElementById('img-placeholder').innerText = "Belum ada gambar";
+            }
+        }
+
+        function updateProgressBar(type, percent) {
+            const bar = document.getElementById(`${type}-progress-bar`);
+            const text = document.getElementById(`${type}-progress-text`);
+            bar.style.width = `${percent}%`;
+            text.innerText = `${percent}%`;
+        }
+
+        async function pollImageStatus(jobId) {
+            const statusDiv = document.getElementById('image-status');
+            const btn = document.getElementById('btn-gen-image');
+            
+            const interval = setInterval(async () => {
+                try {
+                    const res = await fetch(`${API_BASE}/jobs/status/${jobId}`);
+                    const data = await res.json();
+                    
+                    if (data.progress) {
+                        updateProgressBar('image', data.progress);
+                    }
+
+                    if (data.status === 'done') {
+                        clearInterval(interval);
+                        statusDiv.innerHTML = `<span style="color:#00FF88">Selesai dalam ${data.duration_seconds}s!</span>`;
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-magic"></i> Generate Image';
+                        
+                        const imgElem = document.getElementById('result-image');
+                        imgElem.src = `${API_BASE}${data.image_url}`;
+                        imgElem.style.display = 'block';
+                        document.getElementById('img-placeholder').style.display = 'none';
+
+                        // Ambil Base64 gambar untuk persiapan step 2
+                        currentBase64Image = await urlToBase64(`${API_BASE}${data.image_url}`);
+                        unlockStep2();
+
+                    } else if (data.status === 'failed') {
+                        clearInterval(interval);
+                        statusDiv.innerHTML = `<span style="color:#FF4444">Error: ${data.error}</span>`;
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-magic"></i> Generate Image';
+                        document.getElementById('img-placeholder').innerText = "Gagal render";
+                    } else {
+                        statusDiv.innerText = `Colab sedang bekerja... (${data.status})`;
+                    }
+                } catch (e) {
+                    // Ignore temp errors
+                }
+            }, 3000);
+        }
+
+        async function generateVideo() {
+            if(!currentBase64Image) return alert('Tidak ada gambar yang siap!');
+
+            const seed = document.getElementById('video-seed').value;
+            const duration = document.getElementById('video-duration').value;
+            const btn = document.getElementById('btn-gen-video');
+            const statusDiv = document.getElementById('video-status');
+            const progressContainer = document.getElementById('video-progress-container');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<div class="loader"></div> Animating...';
+            document.getElementById('result-video').style.display = 'none';
+            document.getElementById('vid-placeholder').style.display = 'block';
+            document.getElementById('vid-placeholder').innerText = "Mengirim gambar ke Colab...";
+            
+            progressContainer.style.display = 'block';
+            updateProgressBar('video', 0);
+
+            try {
+                const res = await fetch(`${API_BASE}/jobs/generate_video_from_image`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ 
+                        image_base64: currentBase64Image, 
+                        seed: parseInt(seed) || -1,
+                        duration: parseInt(duration) || 5
+                    })
+                });
+                
+                const data = await res.json();
+                if(data.success) {
+                    pollVideoStatus(data.job_id);
+                } else {
+                    throw new Error("Gagal membuat tugas video");
+                }
+            } catch (err) {
+                statusDiv.innerText = `Error: ${err.message}`;
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-play"></i> Animate This Image!';
+                document.getElementById('vid-placeholder').innerText = "Gagal memulai";
+            }
+        }
+
+        async function pollVideoStatus(jobId) {
+            const statusDiv = document.getElementById('video-status');
+            const btn = document.getElementById('btn-gen-video');
+            
+            const interval = setInterval(async () => {
+                try {
+                    const res = await fetch(`${API_BASE}/jobs/status/${jobId}`);
+                    const data = await res.json();
+                    
+                    if (data.progress) {
+                        updateProgressBar('video', data.progress);
+                    }
+
+                    if (data.status === 'done') {
+                        clearInterval(interval);
+                        statusDiv.innerHTML = `<span style="color:#00FF88">Video Selesai dalam ${data.duration_seconds}s!</span>`;
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-play"></i> Animate This Image!';
+                        
+                        const vidElem = document.getElementById('result-video');
+                        vidElem.src = `${API_BASE}${data.video_url}?t=${new Date().getTime()}`;
+                        vidElem.style.display = 'block';
+                        vidElem.load(); // Paksa browser muat ulang file
+                        document.getElementById('vid-placeholder').style.display = 'none';
+
+                    } else if (data.status === 'failed') {
+                        clearInterval(interval);
+                        statusDiv.innerHTML = `<span style="color:#FF4444">Error: ${data.error}</span>`;
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-play"></i> Animate This Image!';
+                        document.getElementById('vid-placeholder').innerText = "Gagal merender video";
+                    } else {
+                        statusDiv.innerText = `Colab merender video... (${data.status})`;
+                    }
+                } catch (e) {
+                    // Ignore temp errors
+                }
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
