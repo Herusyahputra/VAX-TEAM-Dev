@@ -44,7 +44,7 @@
 
         .settings-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
             gap: 16px;
             margin-top: 16px;
         }
@@ -71,6 +71,18 @@
             width: 0%;
             background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue));
             transition: width 0.5s ease;
+        }
+
+        .fullscreen-img {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw !important;
+            height: 100vh !important;
+            object-fit: contain !important;
+            background: rgba(0,0,0,0.9) !important;
+            z-index: 9999;
+            cursor: zoom-out !important;
         }
     </style>
 </head>
@@ -118,36 +130,50 @@
 
             <section class="card">
                 <div class="form-group">
-                    <label class="form-label"><i class="fas fa-magic"></i> PROMPT</label>
-                    <textarea id="t2i-prompt" rows="4" class="form-input" style="min-height: 100px;"
-                        placeholder="A beautiful sunset over a futuristic city, cinematic lighting, 4k..."></textarea>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <label class="form-label" style="margin-bottom: 0;">PROMPT (Deskripsi Gambar)</label>
+                        <button onclick="addHDPrompt()" style="background: linear-gradient(90deg, var(--accent-purple), var(--accent-pink)); border: none; color: white; padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; font-weight: bold;">
+                            <i class="fas fa-magic"></i> + Magic HD
+                        </button>
+                    </div>
+                    <textarea id="t2i-prompt" class="form-input" style="min-height: 120px;"
+                        placeholder="Deskripsikan gambar secara detail...&#10;Contoh: A beautiful woman in a futuristic city, neon lights, rain..."></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label"><i class="fas fa-ban"></i> NEGATIVE PROMPT</label>
+                    <label class="form-label"><i class="fas fa-ban"></i> NEGATIVE PROMPT (Penangkal Gambar Buruk)</label>
                     <input type="text" id="t2i-negative" class="form-input"
-                        value="blurry, low quality, distorted, watermark">
+                        value="blurry, low quality, distorted, watermark, pixelated, ugly, deformed, bad anatomy, artifacts">
                 </div>
 
                 <div class="settings-grid">
                     <div class="form-group">
                         <label class="form-label">Resolution</label>
                         <select id="t2i-resolution" class="form-select">
-                            <option value="512x512" selected>1:1 Square (512×512) - Ultra Stable</option>
-                            <option value="768x512">3:2 Cinematic (768×512) - Recommended</option>
-                            <option value="512x768">2:3 Portrait (512×768) - Social Media</option>
+                            <option value="1920x1080">16:9 Full HD (1920×1080) - Monitor Fullscreen</option>
+                            <option value="1080x1920">9:16 Full HD (1080×1920) - Phone Fullscreen</option>
+                            <option value="1280x720">16:9 HD 720p (1280×720) - YouTube</option>
+                            <option value="1024x1024" selected>1:1 HD Square (1024×1024) - Best Quality</option>
                             <option value="896x512">16:9 Ultra Wide (896×512) - High VRAM</option>
                             <option value="512x896">9:16 Vertical (512×896) - Mobile HQ</option>
+                            <option value="768x512">3:2 Cinematic (768×512) - Recommended</option>
+                            <option value="512x512">1:1 Square (512×512) - Ultra Stable</option>
                             <option value="640x480">4:3 Standard (640×480)</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Steps</label>
-                        <input type="number" id="t2i-steps" class="form-input" value="25" min="10" max="50">
+                        <label class="form-label" title="Semakin tinggi step, semakin bagus dan HD hasilnya (memakan waktu lebih lama)">Steps (Quality)</label>
+                        <input type="number" id="t2i-steps" class="form-input" value="100" min="10" max="150">
+                        <p style="font-size: 10px; color: var(--text-secondary); margin-top: 4px;">Lebih banyak steps = Hasil lebih HD & detail</p>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">CFG Scale</label>
-                        <input type="number" id="t2i-cfg" class="form-input" value="7.5" step="0.5">
+                        <label class="form-label" title="Menentukan seberapa ketat AI mengikuti prompt. Angka 7-9 paling optimal untuk HD.">CFG Scale (Akurasi)</label>
+                        <input type="number" id="t2i-cfg" class="form-input" value="8.0" step="0.1" min="1" max="20">
+                        <p style="font-size: 10px; color: var(--text-secondary); margin-top: 4px;">Ideal: 7.0 - 9.0 (Terlalu tinggi merusak warna)</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Seed (-1 = Random)</label>
+                        <input type="number" id="t2i-seed" class="form-input" value="-1">
                     </div>
                 </div>
 
@@ -194,9 +220,16 @@
                     <i class="fas fa-magic" style="color: var(--accent-purple);"></i> Generation Result
                 </h3>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
-                    <div style="border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
-                        <img id="final-res-img" style="width: 100%; display: block; background: #000;"
+                    <div style="border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); position: relative;">
+                        <img id="final-res-img" style="width: 100%; display: block; background: #000; cursor: zoom-in;"
+                            onclick="this.classList.toggle('fullscreen-img')"
+                            title="Klik untuk lihat Full Screen"
                             onerror="this.src='https://via.placeholder.com/512?text=Image+Load+Error'">
+                        <div id="svg-container" style="display: none; position: absolute; bottom: 10px; right: 10px;">
+                            <a id="download-svg-link" href="#" download class="btn-api" style="font-size: 12px; padding: 6px 12px; background: rgba(16, 185, 129, 0.8); border: 1px solid #10b981; color: #fff; text-decoration: none; border-radius: 8px; backdrop-filter: blur(4px);">
+                                <i class="fas fa-vector-square"></i> Get Vector (.svg)
+                            </a>
+                        </div>
                     </div>
                     <div style="display: flex; flex-direction: column; justify-content: center;">
                         <div class="form-group" style="margin-bottom: 20px;">
@@ -338,6 +371,7 @@
                     card.onclick = () => {
                         // Re-fill form with this prompt if clicked
                         document.getElementById('t2i-prompt').value = job.prompt;
+                        document.getElementById('t2i-seed').value = job.seed || -1;
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                     };
                     card.innerHTML = `
@@ -356,8 +390,15 @@
                         <a href="${API}${job.image_url}" download class="btn-api" 
                            onclick="event.stopPropagation()"
                            style="display: block; text-align: center; font-size: 10px; padding: 6px; text-decoration: none; background: rgba(255,255,255,0.05);">
-                            <i class="fas fa-download"></i> Download
+                            <i class="fas fa-download"></i> Raster (.png)
                         </a>
+                        ${job.svg_url ? `
+                        <a href="${API}${job.svg_url}" download class="btn-api" 
+                           onclick="event.stopPropagation()"
+                           style="display: block; text-align: center; font-size: 10px; padding: 6px; margin-top: 4px; text-decoration: none; background: rgba(16, 185, 129, 0.05); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2);">
+                            <i class="fas fa-vector-square"></i> Vector (.svg)
+                        </a>
+                        ` : ''}
                     `;
                     gallery.appendChild(card);
                 });
@@ -384,7 +425,7 @@
                 height: h,
                 num_inference_steps: parseInt(document.getElementById('t2i-steps').value) || 25,
                 guidance_scale: parseFloat(document.getElementById('t2i-cfg').value) || 7.5,
-                seed: -1
+                seed: parseInt(document.getElementById('t2i-seed').value) || -1
             };
 
             try {
@@ -421,7 +462,7 @@
                         resetUI();
                     }
                 } catch { }
-            }, 3000);
+            }, 1500);
         }
 
         function showResult(data, originalPrompt, resolution, steps, cfg) {
@@ -435,6 +476,17 @@
             document.getElementById('res-cfg').textContent = cfg || '-';
             document.getElementById('detailed-result').style.display = 'block';
             document.getElementById('download-link').href = imgUrl;
+            
+            const svgContainer = document.getElementById('svg-container');
+            if (data.svg_url) {
+                if (svgContainer) {
+                    svgContainer.style.display = 'block';
+                    document.getElementById('download-svg-link').href = `${API}${data.svg_url}`;
+                }
+            } else if (svgContainer) {
+                svgContainer.style.display = 'none';
+            }
+            
             document.getElementById('result-actions').style.display = 'block';
             loadHistory();
             document.getElementById('detailed-result').scrollIntoView({ behavior: 'smooth' });
@@ -446,6 +498,23 @@
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-bolt"></i> Generate Image';
             document.getElementById('progress-box').style.display = 'none';
+        }
+
+        function addHDPrompt() {
+            const promptBox = document.getElementById('t2i-prompt');
+            const hdKeywords = ", masterpiece, best quality, ultra-detailed, 8k resolution, photorealistic, cinematic lighting, sharp focus, intricate details";
+            
+            if (promptBox.value.trim() === "") {
+                promptBox.value = "A beautiful scenery" + hdKeywords;
+            } else if (!promptBox.value.includes("masterpiece")) {
+                promptBox.value = promptBox.value.trim() + hdKeywords;
+            }
+            
+            // Highlight the textarea to show it worked
+            promptBox.style.borderColor = "var(--accent-pink)";
+            setTimeout(() => {
+                promptBox.style.borderColor = "rgba(255,255,255,0.1)";
+            }, 500);
         }
     </script>
 </body>

@@ -189,7 +189,7 @@
         <main>
             <section class="feature-hero">
                 <div class="hero-text">
-                    <div class="hero-badge">VAX ENGINE V3.4</div>
+                    <div class="hero-badge">VAX ENGINE V4.0</div>
                     <h1>Image to Video</h1>
                     <p>Ubah gambar statis menjadi mahakarya sinematik. Pilih model sesuai kebutuhan Anda: SVD untuk
                         gerakan natural, atau CogVideoX untuk kontrol prompt penuh.</p>
@@ -281,6 +281,10 @@
                         <label class="form-label">Noise Aug</label>
                         <input type="number" step="0.01" id="noise-aug" class="form-input" value="0.02">
                     </div>
+                    <div class="form-group">
+                        <label class="form-label">Seed (-1 = Random)</label>
+                        <input type="number" id="video-seed" class="form-input" value="-1">
+                    </div>
                 </div>
 
                 <button class="btn-generate" id="gen-btn" style="width: 100%; margin-top: 10px;"
@@ -319,8 +323,13 @@
                     <i class="fas fa-film" style="color: var(--accent-pink);"></i> Generation Result
                 </h3>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
-                    <div style="border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); aspect-ratio: 16/9; background: #000;">
+                    <div style="border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); aspect-ratio: 16/9; background: #000; position: relative;">
                         <video id="final-res-video" style="width: 100%; display: block;" autoplay loop controls></video>
+                        <div id="svg-container" style="display: none; position: absolute; bottom: 40px; right: 10px;">
+                            <a id="download-svg-link" href="#" download class="btn-api" style="font-size: 12px; padding: 6px 12px; background: rgba(16, 185, 129, 0.8); border: 1px solid #10b981; color: #fff; text-decoration: none; border-radius: 8px; backdrop-filter: blur(4px);">
+                                <i class="fas fa-vector-square"></i> Get Animated Vector (.svg)
+                            </a>
+                        </div>
                     </div>
                     <div style="display: flex; flex-direction: column; justify-content: center;">
                         <div class="form-group" style="margin-bottom: 20px;">
@@ -478,8 +487,15 @@
                         <a href="${API}${job.video_url}" download class="btn-api" 
                            onclick="event.stopPropagation()"
                            style="display: block; text-align: center; font-size: 10px; padding: 6px; text-decoration: none; background: rgba(255,255,255,0.05);">
-                            <i class="fas fa-download"></i> Download
+                            <i class="fas fa-download"></i> Raster Video (.mp4)
                         </a>
+                        ${job.svg_url ? `
+                        <a href="${API}${job.svg_url}" download class="btn-api" 
+                           onclick="event.stopPropagation()"
+                           style="display: block; text-align: center; font-size: 10px; padding: 6px; margin-top: 4px; text-decoration: none; background: rgba(16, 185, 129, 0.05); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2);">
+                            <i class="fas fa-vector-square"></i> Animated Vector (.svg)
+                        </a>
+                        ` : ''}
                     `;
                     gallery.appendChild(card);
                 });
@@ -558,7 +574,8 @@
                 num_frames_cog: frames,
                 motion_bucket_id: parseInt(document.getElementById('motion-id').value) || 127,
                 noise_aug_strength: parseFloat(document.getElementById('noise-aug').value) || 0.02,
-                audio_ref: base64Audio
+                audio_ref: base64Audio,
+                seed: document.getElementById('video-seed') ? (parseInt(document.getElementById('video-seed').value) || -1) : -1
             };
 
             try {
@@ -595,7 +612,7 @@
                         resetUI();
                     }
                 } catch {}
-            }, 3000);
+            }, 1500);
         }
 
         function showResult(data, prompt, resolution, model, frames) {
@@ -617,6 +634,17 @@
             
             document.getElementById('detailed-result').style.display = 'block';
             document.getElementById('download-link').href = videoUrl;
+            
+            const svgContainer = document.getElementById('svg-container');
+            if (data.svg_url) {
+                if (svgContainer) {
+                    svgContainer.style.display = 'block';
+                    document.getElementById('download-svg-link').href = `${API}${data.svg_url}`;
+                }
+            } else if (svgContainer) {
+                svgContainer.style.display = 'none';
+            }
+            
             document.getElementById('result-actions').style.display = 'block';
             
             loadHistory();

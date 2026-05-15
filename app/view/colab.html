@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Colab Engine - VAX Studio</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="layout.css">
@@ -15,6 +18,7 @@
             padding: 40px 0;
             text-align: center;
         }
+
         .colab-card {
             background: rgba(15, 23, 42, 0.7);
             backdrop-filter: blur(20px);
@@ -23,7 +27,7 @@
             padding: 40px;
             max-width: 800px;
             margin: 0 auto 40px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
         }
 
         .engine-status {
@@ -33,7 +37,7 @@
             gap: 15px;
             margin-bottom: 30px;
         }
-        
+
         .status-pill {
             padding: 8px 20px;
             border-radius: 100px;
@@ -45,17 +49,28 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-        .status-offline { background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); }
-        .status-online { background: rgba(34, 197, 94, 0.1); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.2); }
+
+        .status-offline {
+            background: rgba(239, 68, 68, 0.1);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .status-online {
+            background: rgba(34, 197, 94, 0.1);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
 
         .vram-bar {
             width: 100%;
             height: 8px;
-            background: rgba(255,255,255,0.05);
+            background: rgba(255, 255, 255, 0.05);
             border-radius: 4px;
             margin-top: 10px;
             overflow: hidden;
         }
+
         .vram-fill {
             height: 100%;
             width: 0%;
@@ -68,16 +83,21 @@
             gap: 12px;
             margin: 20px 0;
         }
+
         .url-input {
             flex: 1;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
             padding: 15px 20px;
             color: #fff;
             font-family: inherit;
         }
-        .url-input:focus { border-color: var(--accent-purple); outline: none; }
+
+        .url-input:focus {
+            border-color: var(--accent-purple);
+            outline: none;
+        }
 
         .guide-grid {
             display: grid;
@@ -86,14 +106,17 @@
             text-align: left;
             margin-top: 40px;
         }
+
         .guide-item {
-            background: rgba(255,255,255,0.02);
+            background: rgba(255, 255, 255, 0.02);
             padding: 24px;
             border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
+
         .guide-num {
-            width: 30px; height: 30px;
+            width: 30px;
+            height: 30px;
             background: var(--accent-purple);
             border-radius: 50%;
             display: flex;
@@ -105,9 +128,10 @@
         }
     </style>
 </head>
+
 <body>
     <div class="bg-canvas"></div>
-    
+
     <nav class="navbar">
         <div class="nav-container">
             <a href="index.html" class="logo">VAX STUDIO</a>
@@ -128,9 +152,10 @@
         <main>
             <section class="colab-hero">
                 <div class="hero-badge">CLOUD ACCELERATION</div>
-                <h1 style="font-size: 48px; font-weight: 900; margin-bottom: 16px;">Colab Engine v3.1</h1>
+                <h1 style="font-size: 48px; font-weight: 900; margin-bottom: 16px;">Colab Engine v3.3</h1>
                 <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto 40px;">
-                    Hubungkan VAX Studio ke Google Colab (GPU T4) untuk render video kualitas tinggi tanpa menggunakan GPU lokal Anda.
+                    Hubungkan VAX Studio ke Google Colab (GPU T4) untuk render video kualitas tinggi tanpa menggunakan
+                    GPU lokal Anda.
                 </p>
 
                 <div class="colab-card">
@@ -141,7 +166,8 @@
                     </div>
 
                     <div id="vram-monitor" style="margin-bottom: 30px; display: none;">
-                        <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary);">
+                        <div
+                            style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary);">
                             <span>GPU VRAM USAGE</span>
                             <span id="vram-text">0.0 / 15.0 GiB</span>
                         </div>
@@ -150,36 +176,44 @@
                         </div>
                     </div>
 
-                    <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 10px;">Masukan URL Ngrok dari Colab Anda:</p>
+                    <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 10px;">Masukan URL Ngrok
+                        dari Colab Anda:</p>
                     <div class="url-input-box">
-                        <input type="text" id="colab-url" class="url-input" placeholder="https://xxxx-xx.ngrok-free.app">
+                        <input type="text" id="colab-url" class="url-input"
+                            placeholder="https://xxxx-xx.ngrok-free.app">
                         <button class="btn-generate" style="margin-top:0;" onclick="connectEngine()">
                             <i class="fas fa-link"></i> Connect
                         </button>
                     </div>
-                    <p id="current-url-display" style="font-size: 11px; color: rgba(255,255,255,0.3);">URL Saat Ini: Tidak terdeteksi</p>
+                    <p id="current-url-display" style="font-size: 11px; color: rgba(255,255,255,0.3);">URL Saat Ini:
+                        Tidak terdeteksi</p>
                 </div>
 
                 <div class="guide-grid">
                     <div class="guide-item">
                         <div class="guide-num">1</div>
                         <h4 style="margin-bottom:8px;">Buka Colab</h4>
-                        <p style="font-size:13px; color:var(--text-secondary);">Jalankan script <code>colab_engine_v3.1.py</code> di Google Colab. Pastikan Runtime disetel ke GPU (T4).</p>
+                        <p style="font-size:13px; color:var(--text-secondary);">Salin dan jalankan kode dari file
+                            <code>app/model/setup_environment.py</code> (v3.3) ke Google Colab. Pastikan Runtime disetel
+                            ke GPU (T4).</p>
                     </div>
                     <div class="guide-item">
                         <div class="guide-num">2</div>
                         <h4 style="margin-bottom:8px;">Copy Ngrok URL</h4>
-                        <p style="font-size:13px; color:var(--text-secondary);">Tunggu hingga muncul pesan "ONLINE" di Colab, lalu salin URL yang berakhiran <code>.ngrok-free.app</code>.</p>
+                        <p style="font-size:13px; color:var(--text-secondary);">Tunggu hingga muncul pesan "ONLINE" di
+                            Colab, lalu salin URL yang berakhiran <code>.ngrok-free.app</code>.</p>
                     </div>
                     <div class="guide-item">
                         <div class="guide-num">3</div>
                         <h4 style="margin-bottom:8px;">Hubungkan</h4>
-                        <p style="font-size:13px; color:var(--text-secondary);">Tempel URL di kotak di atas dan klik Connect. Status akan berubah menjadi hijau jika berhasil.</p>
+                        <p style="font-size:13px; color:var(--text-secondary);">Tempel URL di kotak di atas dan klik
+                            Connect. Status akan berubah menjadi hijau jika berhasil.</p>
                     </div>
                     <div class="guide-item">
                         <div class="guide-num">4</div>
                         <h4 style="margin-bottom:8px;">Generate</h4>
-                        <p style="font-size:13px; color:var(--text-secondary);">Sekarang Anda bisa menggunakan model CogVideoX-5B yang haus VRAM melalui Colab Engine.</p>
+                        <p style="font-size:13px; color:var(--text-secondary);">Sekarang Anda bisa menggunakan model
+                            CogVideoX-5B yang haus VRAM melalui Colab Engine.</p>
                     </div>
                 </div>
             </section>
@@ -215,7 +249,7 @@
             try {
                 const res = await fetch(`${LOCAL_API}/model/status`);
                 const data = await res.json();
-                
+
                 const pill = document.getElementById('status-pill');
                 const vramBox = document.getElementById('vram-monitor');
                 const urlDisplay = document.getElementById('current-url-display');
@@ -224,12 +258,12 @@
                     pill.className = "status-pill status-online";
                     pill.innerHTML = '<i class="fas fa-check-circle"></i> Engine Connected';
                     urlDisplay.textContent = `URL Terhubung: ${data.colab_url}`;
-                    
+
                     if (data.vram_info) {
                         vramBox.style.display = "block";
                         document.getElementById('vram-text').textContent = data.vram_info;
                         // Example data.vram_info: "4.5/15.0 GiB free"
-                        const [used, total] = data.vram_info.split('/')[0].split(' '); 
+                        const [used, total] = data.vram_info.split('/')[0].split(' ');
                         // Note: Logic simple to extract %
                         const pct = (parseFloat(data.vram_info.split('/')[0]) / parseFloat(data.vram_info.split('/')[1])) * 100;
                         document.getElementById('vram-fill').style.width = (100 - pct) + '%';
@@ -268,4 +302,5 @@
         window.onload = updateStatus;
     </script>
 </body>
+
 </html>

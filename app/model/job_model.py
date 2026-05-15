@@ -19,6 +19,7 @@ class Job(Base):
     type = Column(String(20), default="video") # image, video
     image_url = Column(String(255), nullable=True)
     video_url = Column(String(255), nullable=True)
+    svg_url = Column(String(255), nullable=True)
     filename = Column(String(255), nullable=True)
     error_message = Column(Text, nullable=True)
     duration_seconds = Column(Float, nullable=True)

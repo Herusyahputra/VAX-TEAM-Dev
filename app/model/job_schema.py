@@ -4,11 +4,11 @@ from datetime import datetime
 
 class GenerateImageRequest(BaseModel):
     prompt: str = Field(..., min_length=3, max_length=500)
-    negative_prompt: Optional[str] = Field(default="blurry, low quality, distorted, watermark")
-    width: int = Field(default=1024, ge=256, le=1024)
-    height: int = Field(default=576, ge=256, le=1024)
-    num_inference_steps: int = Field(default=30, ge=1, le=50)
-    guidance_scale: float = Field(default=7.5, ge=1.0, le=20.0)
+    negative_prompt: Optional[str] = Field(default="blurry, low quality, distorted, watermark, pixelated, ugly, deformed, bad anatomy, artifacts")
+    width: int = Field(default=1024, ge=256, le=2048)
+    height: int = Field(default=576, ge=256, le=2048)
+    num_inference_steps: int = Field(default=100, ge=1, le=150)
+    guidance_scale: float = Field(default=8.0, ge=1.0, le=30.0)
     seed: int = Field(default=-1)
 
 class GenerateVideoFromImageRequest(BaseModel):
@@ -48,6 +48,7 @@ class JobStatusResponse(BaseModel):
     prompt: Optional[str] = None
     image_url: Optional[str] = None
     video_url: Optional[str] = None
+    svg_url: Optional[str] = None
     filename: Optional[str] = None
     seed: Optional[int] = None
     error: Optional[str] = None
