@@ -249,31 +249,36 @@
             try {
                 const res = await fetch(`${LOCAL_API}/model/status`);
                 const data = await res.json();
-
+ 
                 const pill = document.getElementById('status-pill');
                 const vramBox = document.getElementById('vram-monitor');
                 const urlDisplay = document.getElementById('current-url-display');
-
-                if (data.colab_url) {
+ 
+                if (data.status === "ok" && data.colab_url) {
                     pill.className = "status-pill status-online";
                     pill.innerHTML = '<i class="fas fa-check-circle"></i> Engine Connected';
                     urlDisplay.textContent = `URL Terhubung: ${data.colab_url}`;
-
+ 
                     if (data.vram_info) {
                         vramBox.style.display = "block";
                         document.getElementById('vram-text').textContent = data.vram_info;
-                        // Example data.vram_info: "4.5/15.0 GiB free"
-                        const [used, total] = data.vram_info.split('/')[0].split(' ');
-                        // Note: Logic simple to extract %
-                        const pct = (parseFloat(data.vram_info.split('/')[0]) / parseFloat(data.vram_info.split('/')[1])) * 100;
-                        document.getElementById('vram-fill').style.width = (100 - pct) + '%';
+                        
+                        // Parse VRAM percentage correctly
+                        const used = parseFloat(data.vram_info.split('/')[0]);
+                        const total = parseFloat(data.vram_info.split('/')[1]);
+                        const pct = (used / total) * 100;
+                        document.getElementById('vram-fill').style.width = pct + '%';
+                    } else {
+                        vramBox.style.display = "none";
                     }
                 } else {
                     pill.className = "status-pill status-offline";
-                    pill.innerHTML = '<i class="fas fa-times-circle"></i> Engine Disconnected';
+                    pill.innerHTML = `<i class="fas fa-times-circle"></i> ${data.message || 'Engine Disconnected'}`;
+                    urlDisplay.textContent = data.colab_url ? `URL Terdaftar: ${data.colab_url}` : "Belum ada URL terdaftar";
                     vramBox.style.display = "none";
                 }
             } catch (e) {
+                document.getElementById('status-pill').className = "status-pill status-offline";
                 document.getElementById('status-pill').innerHTML = '<i class="fas fa-plug"></i> Local Server Offline';
             }
         }

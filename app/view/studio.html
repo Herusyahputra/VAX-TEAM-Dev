@@ -232,6 +232,101 @@
             transform: translateX(-50%) translateY(-5px);
             box-shadow: 0 20px 50px rgba(139, 92, 246, 0.6);
         }
+
+        /* Category Glow Hovers */
+        #node-images:hover {
+            border-color: var(--accent-purple);
+            box-shadow: 0 20px 40px rgba(139, 92, 246, 0.15);
+        }
+        #node-video-ref:hover {
+            border-color: var(--accent-blue);
+            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.15);
+        }
+        #node-audio:hover {
+            border-color: #10B981;
+            box-shadow: 0 20px 40px rgba(16, 185, 129, 0.15);
+        }
+        #node-engine:hover {
+            border-color: var(--accent-purple);
+            box-shadow: 0 20px 45px rgba(139, 92, 246, 0.2);
+        }
+        #node-result:hover {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 20px 45px rgba(6, 182, 212, 0.2);
+        }
+
+        /* Custom Premium Checkbox Styling */
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            margin-top: 15px;
+            user-select: none;
+        }
+
+        .checkbox-container input {
+            display: none;
+        }
+
+        .checkbox-custom {
+            width: 18px;
+            height: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-container:hover .checkbox-custom {
+            border-color: var(--accent-purple);
+            background: rgba(139, 92, 246, 0.05);
+        }
+
+        .checkbox-container input:checked + .checkbox-custom {
+            background: var(--accent-purple);
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.4);
+        }
+
+        .checkbox-custom::after {
+            content: "\f00c";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            color: white;
+            font-size: 10px;
+            display: none;
+        }
+
+        .checkbox-container input:checked + .checkbox-custom::after {
+            display: block;
+        }
+
+        .checkbox-label-text {
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Active Connection Node Pulse */
+        .connector.active {
+            box-shadow: 0 0 10px var(--accent-purple), 0 0 20px var(--accent-purple);
+            animation: pulse-conn 1.5s infinite alternate;
+        }
+
+        @keyframes pulse-conn {
+            0% { transform: translateY(-50%) scale(1); }
+            100% { transform: translateY(-50%) scale(1.3); }
+        }
+
+        .node-card {
+            transition: opacity 0.5s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.4s, box-shadow 0.4s;
+        }
     </style>
 </head>
 
@@ -286,7 +381,17 @@
                 <div class="node-card" id="node-video-ref">
                     <div class="node-header"><span>Video</span><span>Reference</span><i class="fas fa-video"></i></div>
                     <div class="node-content">
-                        <div class="media-dropzone" onclick="document.getElementById('vid-ref-input').click()">
+                        <!-- Video preview (hidden until file uploaded) -->
+                        <div id="vid-ref-preview" style="display:none; position:relative; margin-bottom:10px;">
+                            <video id="vid-ref-player" style="width:100%; border-radius:10px; max-height:150px; object-fit:cover;" controls muted autoplay loop></video>
+                            <div style="position:absolute; top:6px; right:6px;">
+                                <button onclick="clearVideoRef()" style="background:rgba(239,68,68,0.8); border:none; border-radius:6px; padding:4px 8px; color:#fff; font-size:10px; cursor:pointer;">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Dropzone (shown when no video) -->
+                        <div class="media-dropzone" id="vid-ref-dropzone" onclick="document.getElementById('vid-ref-input').click()">
                             <i class="fas fa-clapperboard" style="color: var(--accent-blue);"></i>
                             <span id="vid-ref-name">Drop Reference Video</span>
                             <input type="file" id="vid-ref-input" hidden accept="video/*" onchange="handleVideoRef(this)">
@@ -310,7 +415,7 @@
             </div>
 
             <!-- PROCESSING UNIT -->
-            <div class="node-card" id="node-engine" style="height: 380px;">
+            <div class="node-card" id="node-engine" style="min-height: 380px; height: auto;">
                 <div class="node-header"><span>Core</span><span>AI Engine v3.4</span><i class="fas fa-microchip"></i>
                 </div>
                 <div class="node-content">
@@ -319,16 +424,48 @@
                         <select class="form-select" id="studio-model">
                             <option value="cogvideox">CogVideoX-5B (HQ)</option>
                             <option value="svd">SVD-XT (Fast)</option>
+                            <option value="faceswap-image">Face Swap - Image to Image</option>
+                            <option value="faceswap-video">Face Swap - Image to Video</option>
                         </select>
                     </div>
-                    <div class="form-group" style="margin-top: 15px;">
-                        <label class="form-label">Creative Prompt</label>
-                        <textarea id="studio-prompt" class="form-input" style="min-height: 120px; font-size: 12px;"
-                            placeholder="Describe how to blend assets..."></textarea>
+                    
+                    <!-- Standard text-to-video / image-to-video parameters -->
+                    <div id="generative-settings">
+                        <div class="form-group" style="margin-top: 15px;">
+                            <label class="form-label">Creative Prompt</label>
+                            <textarea id="studio-prompt" class="form-input" style="min-height: 120px; font-size: 12px;"
+                                placeholder="Describe how to blend assets..."></textarea>
+                        </div>
+                        <div id="generative-info"
+                            style="margin-top: 15px; padding: 10px; background: rgba(139,92,246,0.05); border-radius: 8px; font-size: 10px; color: var(--text-secondary);">
+                            <i class="fas fa-info-circle"></i> Blending multiple images with video reference.
+                        </div>
                     </div>
-                    <div
-                        style="margin-top: 15px; padding: 10px; background: rgba(139,92,246,0.05); border-radius: 8px; font-size: 10px; color: var(--text-secondary);">
-                        <i class="fas fa-info-circle"></i> Blending multiple images with video reference.
+
+                    <!-- Face swap parameters -->
+                    <div id="faceswap-settings" style="display: none; margin-top: 15px;">
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label class="form-label">Kaggle Ngrok URL</label>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="kaggle-api-url" class="form-input" style="font-size: 12px;"
+                                    placeholder="https://xxxx.ngrok-free.app">
+                                <button type="button" class="btn-api" style="padding: 10px 14px; border-radius: 12px; margin-top: 0; box-shadow: none;" onclick="checkKaggleConnection()">
+                                    <i class="fas fa-sync" id="kaggle-conn-icon"></i>
+                                </button>
+                            </div>
+                            <span id="kaggle-conn-status" class="status-badge status-offline" style="margin-top: 6px; font-size: 10px;">
+                                <i class="fas fa-circle-notch fa-spin"></i> Unchecked
+                            </span>
+                        </div>
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="faceswap-enhance" checked>
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-label-text">GFPGAN Face Restoration</span>
+                        </label>
+                        <div id="faceswap-info"
+                            style="margin-top: 15px; padding: 10px; background: rgba(59,130,246,0.05); border-radius: 8px; font-size: 10px; color: var(--text-secondary);">
+                            <i class="fas fa-info-circle"></i> <span id="faceswap-info-text">Upload source face and target image.</span>
+                        </div>
                     </div>
                 </div>
                 <div class="connector connector-left"></div>
@@ -336,7 +473,7 @@
             </div>
 
             <!-- RESULT NODE -->
-            <div class="node-card" id="node-result" style="width: 400px;">
+            <div class="node-card" id="node-result" style="width: 480px;">
                 <div class="node-header"><span>Output</span><span>Final Cinematic</span><i class="fas fa-play"></i>
                 </div>
                 <div class="node-content">
@@ -347,7 +484,16 @@
                             <span style="font-size:12px; font-weight:600">Awaiting Pipeline...</span>
                         </div>
                     </div>
-                    <video id="result-vid" style="width:100%; border-radius:12px; display:none" controls></video>
+                    <!-- Wrapper carries border-radius; video has NO transform (Chrome GPU compositing fix) -->
+                    <div id="result-vid-wrapper" style="border-radius:12px; overflow:hidden; display:none;">
+                        <video id="result-vid"
+                            style="width:100%; display:block;"
+                            controls
+                            playsinline
+                            preload="metadata"
+                        ></video>
+                    </div>
+                    <img id="result-img" style="width:100%; border-radius:12px; display:none; aspect-ratio: 16/9; object-fit: contain; background: rgba(0,0,0,0.4);" />
 
                     <div id="studio-progress-box" style="display:none; margin-top:20px;">
                         <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:8px;">
@@ -361,9 +507,12 @@
                         </div>
                     </div>
 
-                    <div id="studio-download" style="display:none; margin-top:20px;">
-                        <a href="#" id="st-dl-link" download class="btn-api" style="display:block; text-align:center; text-decoration:none;">
-                            <i class="fas fa-download"></i> Download Master Video
+                    <div id="studio-download" style="display:none; margin-top:12px;">
+                        <a href="#" id="st-dl-link" download class="btn-api" style="display:block; text-align:center; text-decoration:none; margin-bottom:8px;">
+                            <i class="fas fa-download"></i> Download Result
+                        </a>
+                        <a href="#" id="st-open-tab" target="_blank" style="display:block; text-align:center; font-size:11px; color:var(--text-secondary); text-decoration:none; padding:6px;">
+                            <i class="fas fa-external-link-alt"></i> Buka di tab baru
                         </a>
                     </div>
                 </div>
@@ -379,40 +528,207 @@
     <script>
         const API = 'http://127.0.0.1:8000';
         let studioAssets = {
-            images: [],
-            video: null,
-            audio: null
+            images: [],      // base64 strings
+            imageFiles: [],  // File objects
+            video: null,     // base64 string
+            videoFile: null, // File object
+            audio: null,     // base64 string
+            audioFile: null  // File object
         };
 
         // Handle Multiple Images
         function handleMultiImages(input) {
             const files = Array.from(input.files).slice(0, 5);
+            studioAssets.images = [];
+            studioAssets.imageFiles = [];
+
+            const loadPromises = files.map(file => {
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        studioAssets.images.push(e.target.result.split(',')[1]);
+                        studioAssets.imageFiles.push(file);
+                        resolve();
+                    };
+                    reader.readAsDataURL(file);
+                });
+            });
+
+            Promise.all(loadPromises).then(() => {
+                renderImageSlots();
+            });
+        }
+
+        // Render Image Preview Slots dynamically based on the active model
+        function renderImageSlots() {
             const grid = document.getElementById('image-assets-grid');
             grid.innerHTML = '';
+            
+            const model = document.getElementById('studio-model').value;
+            
+            if (model === 'faceswap-image') {
+                const slots = [
+                    { label: 'Source Face', icon: 'fa-user-astronaut', color: 'var(--accent-purple)' },
+                    { label: 'Target Photo', icon: 'fa-image', color: 'var(--accent-blue)' }
+                ];
 
-            files.forEach(file => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    studioAssets.images.push(e.target.result.split(',')[1]);
+                // Switch grid to single-column for faceswap
+                grid.style.gridTemplateColumns = '1fr';
+                grid.style.gap = '8px';
+
+                slots.forEach((slot, index) => {
+                    const card = document.createElement('div');
+                    card.style.cssText = `
+                        position: relative;
+                        border-radius: 10px;
+                        overflow: hidden;
+                        background: rgba(0,0,0,0.3);
+                        border: 1px solid rgba(255,255,255,0.06);
+                        cursor: pointer;
+                        aspect-ratio: 4/3;
+                    `;
+
+                    if (studioAssets.imageFiles[index]) {
+                        const url = URL.createObjectURL(studioAssets.imageFiles[index]);
+                        card.innerHTML = `
+                            <img src="${url}" style="width:100%; height:100%; object-fit:cover; display:block;">
+                            <div style="
+                                position:absolute; bottom:0; left:0; right:0;
+                                background: linear-gradient(0deg, rgba(0,0,0,0.85) 0%, transparent 100%);
+                                padding: 10px 12px 8px;
+                                display: flex; align-items: center; gap: 6px;
+                            ">
+                                <i class="fas ${slot.icon}" style="color:${slot.color}; font-size:11px;"></i>
+                                <span style="font-size:10px; color:#fff; font-weight:700; text-transform:uppercase; letter-spacing:1px;">${slot.label}</span>
+                            </div>
+                        `;
+                    } else {
+                        card.innerHTML = `
+                            <div style="
+                                width:100%; height:100%;
+                                display:flex; flex-direction:column;
+                                align-items:center; justify-content:center;
+                                gap: 8px;
+                                border: 2px dashed rgba(255,255,255,0.06);
+                                border-radius: 10px;
+                            ">
+                                <i class="fas ${slot.icon}" style="color:${slot.color}; font-size:28px; opacity:0.4;"></i>
+                                <span style="font-size:11px; color:rgba(255,255,255,0.35); text-transform:uppercase; font-weight:700; letter-spacing:1px;">${slot.label}</span>
+                                <span style="font-size:9px; color:rgba(255,255,255,0.2);">Click upload to add</span>
+                            </div>
+                        `;
+                    }
+                    card.onclick = () => document.getElementById('multi-img-input').click();
+                    grid.appendChild(card);
+                });
+
+            } else if (model === 'faceswap-video') {
+                const slots = [
+                    { label: 'Source Face', icon: 'fa-user-astronaut', color: 'var(--accent-purple)' }
+                ];
+
+                grid.style.gridTemplateColumns = '1fr';
+                grid.style.gap = '8px';
+
+                slots.forEach((slot, index) => {
+                    const card = document.createElement('div');
+                    card.style.cssText = `
+                        position: relative;
+                        border-radius: 10px;
+                        overflow: hidden;
+                        background: rgba(0,0,0,0.3);
+                        border: 1px solid rgba(255,255,255,0.06);
+                        cursor: pointer;
+                        aspect-ratio: 1;
+                    `;
+
+                    if (studioAssets.imageFiles[index]) {
+                        const url = URL.createObjectURL(studioAssets.imageFiles[index]);
+                        card.innerHTML = `
+                            <img src="${url}" style="width:100%; height:100%; object-fit:cover; display:block;">
+                            <div style="
+                                position:absolute; bottom:0; left:0; right:0;
+                                background: linear-gradient(0deg, rgba(0,0,0,0.85) 0%, transparent 100%);
+                                padding: 10px 12px 8px;
+                                display: flex; align-items: center; gap: 6px;
+                            ">
+                                <i class="fas ${slot.icon}" style="color:${slot.color}; font-size:11px;"></i>
+                                <span style="font-size:10px; color:#fff; font-weight:700; text-transform:uppercase; letter-spacing:1px;">${slot.label}</span>
+                            </div>
+                        `;
+                    } else {
+                        card.innerHTML = `
+                            <div style="
+                                width:100%; height:100%;
+                                display:flex; flex-direction:column;
+                                align-items:center; justify-content:center;
+                                gap: 8px;
+                                border: 2px dashed rgba(255,255,255,0.06);
+                                border-radius: 10px;
+                            ">
+                                <i class="fas ${slot.icon}" style="color:${slot.color}; font-size:36px; opacity:0.4;"></i>
+                                <span style="font-size:11px; color:rgba(255,255,255,0.35); text-transform:uppercase; font-weight:700; letter-spacing:1px;">${slot.label}</span>
+                                <span style="font-size:9px; color:rgba(255,255,255,0.2);">Click upload to add</span>
+                            </div>
+                        `;
+                    }
+                    card.onclick = () => document.getElementById('multi-img-input').click();
+                    grid.appendChild(card);
+                });
+            } else {
+                const maxImages = Math.max(5, studioAssets.imageFiles.length + 1);
+                for (let i = 0; i < Math.min(5, maxImages); i++) {
                     const thumb = document.createElement('div');
                     thumb.className = 'asset-thumb';
-                    thumb.innerHTML = `<img src="${e.target.result}">`;
+                    
+                    if (studioAssets.imageFiles[i]) {
+                        const file = studioAssets.imageFiles[i];
+                        const url = URL.createObjectURL(file);
+                        thumb.innerHTML = `<img src="${url}">`;
+                    } else {
+                        thumb.style.display = 'flex';
+                        thumb.style.alignItems = 'center';
+                        thumb.style.justifyContent = 'center';
+                        thumb.style.border = '1px dashed rgba(255,255,255,0.1)';
+                        thumb.innerHTML = `<i class="fas fa-plus" style="opacity:0.2"></i>`;
+                    }
                     grid.appendChild(thumb);
-                };
-                reader.readAsDataURL(file);
-            });
+                }
+            }
         }
 
         // Handle Video Reference
         function handleVideoRef(input) {
             const file = input.files[0];
             if (!file) return;
+
+            studioAssets.videoFile = file;
+            studioAssets.video = null; // will not be needed as we pass File object directly
+
+            // Show video preview
+            const objectUrl = URL.createObjectURL(file);
+            const player = document.getElementById('vid-ref-player');
+            const preview = document.getElementById('vid-ref-preview');
+            const dropzone = document.getElementById('vid-ref-dropzone');
+
+            player.src = objectUrl;
+            player.load();
+            preview.style.display = 'block';
+            dropzone.style.display = 'none';
             document.getElementById('vid-ref-name').textContent = file.name;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                studioAssets.video = e.target.result.split(',')[1];
-            };
-            reader.readAsDataURL(file);
+        }
+
+        // Clear Video Reference
+        function clearVideoRef() {
+            studioAssets.videoFile = null;
+            studioAssets.video = null;
+            const player = document.getElementById('vid-ref-player');
+            player.pause();
+            player.src = '';
+            document.getElementById('vid-ref-preview').style.display = 'none';
+            document.getElementById('vid-ref-dropzone').style.display = 'block';
+            document.getElementById('vid-ref-name').textContent = 'Drop Reference Video';
+            document.getElementById('vid-ref-input').value = '';
         }
 
         // Handle Audio
@@ -420,6 +736,7 @@
             const file = input.files[0];
             if (!file) return;
             document.getElementById('audio-name').textContent = file.name;
+            studioAssets.audioFile = file;
             const reader = new FileReader();
             reader.onload = (e) => {
                 studioAssets.audio = e.target.result.split(',')[1];
@@ -427,8 +744,159 @@
             reader.readAsDataURL(file);
         }
 
+        // Update layout based on model selection
+        function updateModelLayout() {
+            const model = document.getElementById('studio-model').value;
+            const genSettings = document.getElementById('generative-settings');
+            const fsSettings = document.getElementById('faceswap-settings');
+            const nodeImages = document.getElementById('node-images');
+            const nodeVideo = document.getElementById('node-video-ref');
+            const nodeAudio = document.getElementById('node-audio');
+            const fsInfoText = document.getElementById('faceswap-info-text');
+            const uploadBtn = document.querySelector('#node-images .btn-add-asset');
+
+            // Select node connectors for pulsing glow
+            const connImages = document.querySelector('#node-images .connector');
+            const connVideo = document.querySelector('#node-video-ref .connector');
+            const connAudio = document.querySelector('#node-audio .connector');
+
+            if (model.startsWith('faceswap-')) {
+                genSettings.style.display = 'none';
+                fsSettings.style.display = 'block';
+                
+                if (model === 'faceswap-image') {
+                    // Only need Images
+                    nodeImages.style.opacity = '1';
+                    nodeImages.style.pointerEvents = 'auto';
+                    if (connImages) connImages.classList.add('active');
+
+                    nodeVideo.style.opacity = '0.15';
+                    nodeVideo.style.pointerEvents = 'none';
+                    if (connVideo) connVideo.classList.remove('active');
+
+                    nodeAudio.style.opacity = '0.15';
+                    nodeAudio.style.pointerEvents = 'none';
+                    if (connAudio) connAudio.classList.remove('active');
+                    
+                    fsInfoText.textContent = 'Upload Source Face (Gambar 1) dan Target Photo (Gambar 2).';
+                    if (uploadBtn) uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Upload Face & Photo';
+                } else if (model === 'faceswap-video') {
+                    // Need Images and Video Reference
+                    nodeImages.style.opacity = '1';
+                    nodeImages.style.pointerEvents = 'auto';
+                    if (connImages) connImages.classList.add('active');
+
+                    nodeVideo.style.opacity = '1';
+                    nodeVideo.style.pointerEvents = 'auto';
+                    if (connVideo) connVideo.classList.add('active');
+
+                    nodeAudio.style.opacity = '0.15';
+                    nodeAudio.style.pointerEvents = 'none';
+                    if (connAudio) connAudio.classList.remove('active');
+                    
+                    fsInfoText.textContent = 'Upload Source Face (Gambar 1) dan Target Video (di Node Video).';
+                    if (uploadBtn) uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Upload Source Face';
+                }
+            } else {
+                // Generative models
+                genSettings.style.display = 'block';
+                fsSettings.style.display = 'none';
+                
+                nodeImages.style.opacity = '1';
+                nodeImages.style.pointerEvents = 'auto';
+                if (connImages) connImages.classList.remove('active');
+
+                nodeVideo.style.opacity = '1';
+                nodeVideo.style.pointerEvents = 'auto';
+                if (connVideo) connVideo.classList.remove('active');
+
+                nodeAudio.style.opacity = '1';
+                nodeAudio.style.pointerEvents = 'auto';
+                if (connAudio) connAudio.classList.remove('active');
+                
+                if (uploadBtn) uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Upload Images (Max 5)';
+            }
+            
+            drawConnections();
+            renderImageSlots();
+        }
+
+        // Check Connection to Kaggle API
+        async function checkKaggleConnection(silent = false) {
+            const urlInput = document.getElementById('kaggle-api-url');
+            let url = urlInput.value.trim().replace(/\/$/, "");
+            if (!url) {
+                if (!silent) alert('Silakan masukkan URL Ngrok terlebih dahulu!');
+                return false;
+            }
+            urlInput.value = url;
+
+            const icon = document.getElementById('kaggle-conn-icon');
+            const statusText = document.getElementById('kaggle-conn-status');
+            
+            if (icon) icon.classList.add('fa-spin');
+            if (statusText) {
+                statusText.className = 'status-badge status-checking';
+                statusText.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Menghubungkan...';
+            }
+
+            try {
+                // Save locally & to local server settings
+                localStorage.setItem('kaggle_api_url', url);
+                saveColabUrlToBackend(url);
+
+                const res = await fetch(`${url}/health`, {
+                    headers: { 'ngrok-skip-browser-warning': 'true' }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    const gpu = data.gpu || 'GPU';
+                    if (statusText) {
+                        statusText.className = 'status-badge status-online';
+                        statusText.innerHTML = `<i class="fas fa-check-circle"></i> Connected (${gpu})`;
+                    }
+                    if (!silent) alert(`Berhasil terhubung ke Kaggle Face Swap API!\nGPU: ${gpu}`);
+                    return true;
+                } else {
+                    throw new Error(`HTTP ${res.status}`);
+                }
+            } catch (e) {
+                if (statusText) {
+                    statusText.className = 'status-badge status-offline';
+                    statusText.innerHTML = '<i class="fas fa-times-circle"></i> Gagal terhubung';
+                }
+                if (!silent) alert('Gagal terhubung ke Kaggle API. Pastikan server sudah online di Kaggle dan URL ngrok benar.\nError: ' + e.message);
+                return false;
+            } finally {
+                if (icon) icon.classList.remove('fa-spin');
+            }
+        }
+
+        // Sync Ngrok URL with local FastAPI server config
+        async function saveColabUrlToBackend(url) {
+            try {
+                await fetch(`${API}/model/set-colab-url`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url })
+                });
+            } catch (e) {
+                console.error("Gagal sinkronisasi URL ke backend lokal:", e);
+            }
+        }
+
+        // Run Studio Flow Controller
         async function runStudioFlow(event) {
             if (event) event.preventDefault();
+            
+            const model = document.getElementById('studio-model').value;
+            
+            if (model.startsWith('faceswap-')) {
+                await runFaceSwapFlow();
+                return;
+            }
+
+            // --- Original CogVideoX/SVD Pipeline ---
             if (studioAssets.images.length === 0) { alert('Upload setidaknya satu gambar!'); return; }
 
             const btn = document.querySelector('.btn-studio-run');
@@ -436,17 +904,17 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> PIPELINE RUNNING...';
 
             document.getElementById('studio-progress-box').style.display = 'block';
-            document.getElementById('result-vid').style.display = 'none';
+            document.getElementById('result-vid-wrapper').style.display = 'none';
+            document.getElementById('result-img').style.display = 'none';
             document.getElementById('result-ph').style.display = 'flex';
             document.getElementById('studio-download').style.display = 'none';
 
-            // Payload complex supporting multi-assets
             const payload = {
-                image_base64: studioAssets.images[0], // Primary image
-                images_extra: studioAssets.images.slice(1), // Extra images
+                image_base64: studioAssets.images[0],
+                images_extra: studioAssets.images.slice(1),
                 video_ref: studioAssets.video,
                 audio_ref: studioAssets.audio,
-                model: document.getElementById('studio-model').value,
+                model: model,
                 prompt: document.getElementById('studio-prompt').value,
                 num_frames: 25
             };
@@ -468,25 +936,282 @@
             }
         }
 
+        // Run Face Swap Pipeline
+        async function runFaceSwapFlow() {
+            const model = document.getElementById('studio-model').value;
+            const kaggleUrlInput = document.getElementById('kaggle-api-url');
+            let kaggleUrl = kaggleUrlInput.value.trim().replace(/\/$/, "");
+            
+            if (!kaggleUrl) {
+                alert('Silakan masukkan URL Ngrok Kaggle terlebih dahulu di Core Engine!');
+                return;
+            }
+            
+            if (studioAssets.imageFiles.length === 0) {
+                alert('Silakan upload Source Face (Gambar 1) terlebih dahulu!');
+                return;
+            }
+            
+            const sourceFace = studioAssets.imageFiles[0];
+            let endpoint = '';
+            let formData = new FormData();
+            formData.append('source', sourceFace);
+            
+            const enhance = document.getElementById('faceswap-enhance').checked;
+            formData.append('enhance', enhance ? 'true' : 'false');
+            
+            if (model === 'faceswap-image') {
+                if (studioAssets.imageFiles.length < 2) {
+                    alert('Silakan upload Target Photo (Gambar 2) untuk Face Swap Gambar!');
+                    return;
+                }
+                const targetPhoto = studioAssets.imageFiles[1];
+                formData.append('target', targetPhoto);
+                endpoint = `${kaggleUrl}/swap/image`;
+            } else if (model === 'faceswap-video') {
+                if (!studioAssets.videoFile) {
+                    alert('Silakan upload Target Video di Node Video Reference untuk Face Swap Video!');
+                    return;
+                }
+                formData.append('target', studioAssets.videoFile);
+                endpoint = `${kaggleUrl}/swap/video`;
+            }
+            
+            const btn = document.querySelector('.btn-studio-run');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> RUNNING SWAP...';
+            
+            document.getElementById('studio-progress-box').style.display = 'block';
+            document.getElementById('st-status').textContent = 'Uploading files & queuing job...';
+            document.getElementById('st-pct').textContent = 'Queued';
+            document.getElementById('studio-progress-fill').style.width = '10%';
+            
+            document.getElementById('result-vid-wrapper').style.display = 'none';
+            document.getElementById('result-img').style.display = 'none';
+            document.getElementById('result-ph').style.display = 'flex';
+            document.getElementById('studio-download').style.display = 'none';
+            
+            try {
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'ngrok-skip-browser-warning': 'true' }
+                });
+                
+                if (!res.ok) {
+                    const text = await res.text();
+                    throw new Error(text || `HTTP ${res.status}`);
+                }
+                
+                const data = await res.json();
+                if (data.job_id) {
+                    localStorage.setItem('active_faceswap_job', data.job_id);
+                    localStorage.setItem('active_faceswap_type', model);
+                    localStorage.setItem('active_faceswap_api', kaggleUrl);
+                    pollFaceSwapStatus(data.job_id, model, kaggleUrl);
+                } else {
+                    throw new Error('Gagal mendapatkan Job ID dari server.');
+                }
+            } catch (e) {
+                alert('Face Swap Error: ' + e.message);
+                resetStudioUI();
+            }
+        }
+
+        // Poll Face Swap Status
+        function pollFaceSwapStatus(job_id, model, kaggleUrl) {
+            const progressFill = document.getElementById('studio-progress-fill');
+            const pctText = document.getElementById('st-pct');
+            const statusText = document.getElementById('st-status');
+            
+            let fakeProgress = 10;
+            let errorCount = 0;
+            const timer = setInterval(async () => {
+                try {
+                    const res = await fetch(`${kaggleUrl}/status/${job_id}`, {
+                        headers: { 'ngrok-skip-browser-warning': 'true' }
+                    });
+                    
+                    if (!res.ok) {
+                        if (res.status === 404) {
+                            clearInterval(timer);
+                            localStorage.removeItem('active_faceswap_job');
+                            localStorage.removeItem('active_faceswap_type');
+                            localStorage.removeItem('active_faceswap_api');
+                            resetStudioUI();
+                            statusText.textContent = 'Job tidak ditemukan (mungkin server restart).';
+                            return;
+                        }
+                        errorCount++;
+                        if (errorCount > 5) {
+                            clearInterval(timer);
+                            localStorage.removeItem('active_faceswap_job');
+                            localStorage.removeItem('active_faceswap_type');
+                            localStorage.removeItem('active_faceswap_api');
+                            resetStudioUI();
+                            statusText.textContent = 'Gagal menghubungi server Kaggle.';
+                        }
+                        return;
+                    }
+                    
+                    errorCount = 0;
+                    const data = await res.json();
+                    
+                    if (data.status === 'processing') {
+                        statusText.textContent = 'Processing Face Swap...';
+                        if (fakeProgress < 90) {
+                            fakeProgress += (model === 'faceswap-video' ? 3 : 15);
+                        }
+                        progressFill.style.width = fakeProgress + '%';
+                        pctText.textContent = Math.round(fakeProgress) + '%';
+                    } else if (data.status === 'queued') {
+                        statusText.textContent = 'Menunggu antrian GPU...';
+                        progressFill.style.width = '15%';
+                        pctText.textContent = 'Queued';
+                    } else if (data.status === 'done') {
+                        clearInterval(timer);
+                        progressFill.style.width = '100%';
+                        pctText.textContent = '100%';
+                        statusText.textContent = 'Mengambil hasil...';
+ 
+                        const resultApiUrl = `${kaggleUrl}/result/${job_id}`;
+                        const resultPh = document.getElementById('result-ph');
+                        const resultVid = document.getElementById('result-vid');
+                        const resultImg = document.getElementById('result-img');
+                        const vidWrapper = document.getElementById('result-vid-wrapper');
+                        const dlBox = document.getElementById('studio-download');
+                        const dlLink = document.getElementById('st-dl-link');
+ 
+                        try {
+                            // Fetch blob — CORS is open on Kaggle API
+                            statusText.textContent = 'Mengunduh hasil dari Kaggle...';
+                            const blobRes = await fetch(resultApiUrl, {
+                                headers: { 'ngrok-skip-browser-warning': 'true' }
+                            });
+ 
+                            if (!blobRes.ok) throw new Error(`HTTP ${blobRes.status}`);
+ 
+                            // Determine type from response header or model name
+                            const contentType = blobRes.headers.get('content-type') || '';
+                            const isVideo = model === 'faceswap-video' || contentType.startsWith('video/');
+                            const ext = isVideo ? 'mp4' : 'jpg';
+ 
+                            // Use blob() directly — preserves structure needed for video seeking
+                            let blob = await blobRes.blob();
+                            // Fix MIME type if server returned wrong type
+                            if (isVideo && !blob.type.startsWith('video/')) {
+                                blob = blob.slice(0, blob.size, 'video/mp4');
+                            }
+                            const blobUrl = URL.createObjectURL(blob);
+ 
+                            // 'Open in new tab' always uses direct API URL (no ngrok interstitial needed from fetch)
+                            document.getElementById('st-open-tab').href = blobUrl;
+ 
+                            if (isVideo) {
+                                resultImg.style.display = 'none';
+                                resultVid.src = blobUrl;
+                                vidWrapper.style.display = 'block';
+                                resultVid.play().catch(() => {});
+                            } else {
+                                vidWrapper.style.display = 'none';
+                                resultImg.src = blobUrl;
+                                resultImg.style.display = 'block';
+                            }
+ 
+                            resultPh.style.display = 'none';
+                            statusText.textContent = '✅ Selesai!';
+ 
+                            dlLink.href = blobUrl;
+                            dlLink.download = `faceswap_${job_id}.${ext}`;
+                            dlLink.onclick = null;
+                            dlBox.style.display = 'block';
+ 
+                        } catch (fetchErr) {
+                            console.error('Gagal fetch blob:', fetchErr);
+                            // Fallback: open in new tab (lets browser handle download)
+                            statusText.textContent = '✅ Selesai (lihat tab baru)';
+                            resultPh.style.display = 'none';
+                            dlLink.href = '#';
+                            dlLink.download = '';
+                            dlLink.onclick = (e) => {
+                                e.preventDefault();
+                                window.open(resultApiUrl, '_blank');
+                            };
+                            dlBox.style.display = 'block';
+                        }
+ 
+                        localStorage.removeItem('active_faceswap_job');
+                        localStorage.removeItem('active_faceswap_type');
+                        localStorage.removeItem('active_faceswap_api');
+                        resetStudioUI();
+                    } else if (data.status === 'error') {
+                        clearInterval(timer);
+                        alert('Face Swap Gagal: ' + data.error);
+                        localStorage.removeItem('active_faceswap_job');
+                        localStorage.removeItem('active_faceswap_type');
+                        localStorage.removeItem('active_faceswap_api');
+                        resetStudioUI();
+                    }
+                } catch (e) {
+                    console.error("Polling error:", e);
+                    errorCount++;
+                    if (errorCount > 5) {
+                        clearInterval(timer);
+                        localStorage.removeItem('active_faceswap_job');
+                        localStorage.removeItem('active_faceswap_type');
+                        localStorage.removeItem('active_faceswap_api');
+                        resetStudioUI();
+                        statusText.textContent = 'Gagal menghubungi server Kaggle.';
+                    }
+                }
+            }, 2500);
+        }
+ 
+        // Poll Studio (Original Generative Pipeline)
         function pollStudioStatus(id) {
+            let errorCount = 0;
             const timer = setInterval(async () => {
                 try {
                     const res = await fetch(`${API}/jobs/status/${id}`);
+                    if (!res.ok) {
+                        if (res.status === 404) {
+                            clearInterval(timer);
+                            localStorage.removeItem('active_studio_job');
+                            resetStudioUI();
+                            return;
+                        }
+                        errorCount++;
+                        if (errorCount > 5) {
+                            clearInterval(timer);
+                            localStorage.removeItem('active_studio_job');
+                            resetStudioUI();
+                        }
+                        return;
+                    }
+                    
+                    errorCount = 0;
                     const data = await res.json();
                     const pct = data.progress || 0;
                     document.getElementById('studio-progress-fill').style.width = pct + '%';
                     document.getElementById('st-pct').textContent = pct + '%';
                     document.getElementById('st-status').textContent = data.status === 'processing' ? 'Generating Content...' : 'Finalizing...';
-
+ 
                     if (data.status === 'done') {
                         clearInterval(timer);
                         const vid = document.getElementById('result-vid');
+                        const vidWrapper = document.getElementById('result-vid-wrapper');
                         const url = `${API}${data.video_url}`;
+                        vid.pause();
+                        vid.removeAttribute('src');
+                        vid.load();
                         vid.src = url;
-                        vid.style.display = 'block';
+                        vid.load();
+                        vidWrapper.style.display = 'block';
                         document.getElementById('result-ph').style.display = 'none';
                         document.getElementById('studio-download').style.display = 'block';
                         document.getElementById('st-dl-link').href = url;
+                        document.getElementById('st-dl-link').download = 'output_video.mp4';
+                        document.getElementById('st-open-tab').href = url;
                         localStorage.removeItem('active_studio_job');
                         resetStudioUI();
                     } else if (data.status === 'failed') {
@@ -495,42 +1220,110 @@
                         localStorage.removeItem('active_studio_job');
                         resetStudioUI();
                     }
-                } catch { }
+                } catch (e) {
+                    errorCount++;
+                    if (errorCount > 5) {
+                        clearInterval(timer);
+                        localStorage.removeItem('active_studio_job');
+                        resetStudioUI();
+                    }
+                }
             }, 3000);
         }
 
+        // Reset UI Buttons/Spinners
         function resetStudioUI() {
             const btn = document.querySelector('.btn-studio-run');
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-bolt"></i> EXECUTE PIPELINE';
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-bolt"></i> EXECUTE PIPELINE';
+            }
             document.getElementById('studio-progress-box').style.display = 'none';
         }
 
         // Complex Connections Drawing
         function drawConnections() {
             const svg = document.getElementById('connections-svg');
-            svg.innerHTML = `
-                <!-- Lines from inputs to engine -->
-                <path d="M 450 330 C 550 330, 550 450, 650 450" class="connection-line"/>
-                <path d="M 450 520 C 550 520, 550 450, 650 450" class="connection-line"/>
-                <path d="M 450 710 C 550 710, 550 450, 650 450" class="connection-line"/>
-                
-                <!-- Line from engine to result -->
-                <path d="M 970 450 C 1050 450, 1050 450, 1100 450" class="connection-line"/>
-            `;
-        }
-        window.onload = () => {
-            drawConnections();
+            const model = document.getElementById('studio-model').value;
             
-            // Auto-Resume logic
+            let paths = '';
+            
+            if (model === 'faceswap-image') {
+                // Connect only Images node to Engine (Middle input is line 1: y=330 approx)
+                paths += `<path d="M 450 330 C 550 330, 550 450, 650 450" class="connection-line" style="stroke: var(--accent-purple); stroke-width: 3px;"/>`;
+            } else if (model === 'faceswap-video') {
+                // Connect Images and Video to Engine
+                paths += `<path d="M 450 330 C 550 330, 550 450, 650 450" class="connection-line" style="stroke: var(--accent-purple); stroke-width: 3px;"/>`;
+                paths += `<path d="M 450 520 C 550 520, 550 450, 650 450" class="connection-line" style="stroke: var(--accent-blue); stroke-width: 3px;"/>`;
+            } else {
+                // Connect all inputs to Engine (Images, Video, Audio)
+                paths += `<path d="M 450 330 C 550 330, 550 450, 650 450" class="connection-line"/>`;
+                paths += `<path d="M 450 520 C 550 520, 550 450, 650 450" class="connection-line"/>`;
+                paths += `<path d="M 450 710 C 550 710, 550 450, 650 450" class="connection-line"/>`;
+            }
+            
+            // Connect Engine to Result (Always active)
+            paths += `<path d="M 970 450 C 1050 450, 1050 450, 1100 450" class="connection-line" style="stroke: linear-gradient(90deg, var(--accent-purple), var(--accent-blue)); stroke-width: 3px;"/>`;
+            
+            svg.innerHTML = paths;
+        }
+
+        // On window load initialization
+        window.onload = async () => {
+            // Register model change event
+            document.getElementById('studio-model').addEventListener('change', updateModelLayout);
+            
+            // Set initial state
+            updateModelLayout();
+            
+            // Load saved Kaggle URL from backend / local
+            try {
+                const res = await fetch(`${API}/model/status`);
+                const data = await res.json();
+                if (data.colab_url) {
+                    document.getElementById('kaggle-api-url').value = data.colab_url;
+                    checkKaggleConnection(true);
+                } else {
+                    const saved = localStorage.getItem('kaggle_api_url');
+                    if (saved) {
+                        document.getElementById('kaggle-api-url').value = saved;
+                        checkKaggleConnection(true);
+                    }
+                }
+            } catch (e) {
+                const saved = localStorage.getItem('kaggle_api_url');
+                if (saved) {
+                    document.getElementById('kaggle-api-url').value = saved;
+                    checkKaggleConnection(true);
+                }
+            }
+
+            // Auto-Resume standard generative job logic
             const savedJob = localStorage.getItem('active_studio_job');
             if (savedJob) {
                 console.log("Resuming Studio Job:", savedJob);
                 document.getElementById('studio-progress-box').style.display = 'block';
                 const btn = document.querySelector('.btn-studio-run');
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> RESUMING PIPELINE...';
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> RESUMING PIPELINE...';
+                }
                 pollStudioStatus(savedJob);
+            }
+
+            // Auto-Resume Face Swap job logic
+            const savedFsJob = localStorage.getItem('active_faceswap_job');
+            const savedFsType = localStorage.getItem('active_faceswap_type');
+            const savedFsApi = localStorage.getItem('active_faceswap_api');
+            if (savedFsJob && savedFsType && savedFsApi) {
+                console.log("Resuming Face Swap Job:", savedFsJob);
+                document.getElementById('studio-progress-box').style.display = 'block';
+                const btn = document.querySelector('.btn-studio-run');
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> RESUMING SWAP...';
+                }
+                pollFaceSwapStatus(savedFsJob, savedFsType, savedFsApi);
             }
 
             window.addEventListener('resize', drawConnections);

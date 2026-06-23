@@ -6,23 +6,29 @@ import sys, io
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 import pymysql
 
+from app.core.config import settings
+from sqlalchemy.engine.url import make_url
+
+url = make_url(settings.DB_URL)
 conn = pymysql.connect(
-    host='localhost',
-    user='root',
-    password='',
-    database='vax_dev',
+    host=url.host or 'localhost',
+    port=url.port or 3306,
+    user=url.username or 'root',
+    password=url.password or '',
+    database=url.database or 'vax_dev',
     charset='utf8mb4'
 )
 cur = conn.cursor()
 
 try:
+    db_name = url.database or 'vax_dev'
     # Cek apakah kolom sudah ada
     cur.execute("""
         SELECT COUNT(*) FROM information_schema.COLUMNS
-        WHERE TABLE_SCHEMA = 'vax_dev'
+        WHERE TABLE_SCHEMA = %s
           AND TABLE_NAME   = 'jobs'
           AND COLUMN_NAME  = 'svg_url'
-    """)
+    """, (db_name,))
     exists = cur.fetchone()[0]
 
     if exists:

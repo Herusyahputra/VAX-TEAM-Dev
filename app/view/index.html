@@ -7,7 +7,9 @@
     <title>VAX STUDIO | The Future of AI Video</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="layout.css">
     <style>
@@ -38,7 +40,9 @@
             overflow-x: hidden;
         }
 
-        h1, h2, h3 {
+        h1,
+        h2,
+        h3 {
             font-family: 'Outfit', sans-serif;
         }
 
@@ -51,8 +55,8 @@
             height: 100%;
             z-index: -2;
             background: radial-gradient(circle at 0% 0%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
-                        radial-gradient(circle at 100% 100%, rgba(6, 182, 212, 0.15) 0%, transparent 40%),
-                        radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 1) 0%, var(--bg-deep) 100%);
+                radial-gradient(circle at 100% 100%, rgba(6, 182, 212, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 1) 0%, var(--bg-deep) 100%);
         }
 
         .bg-grid {
@@ -62,7 +66,7 @@
             width: 100%;
             height: 100%;
             background-image: linear-gradient(var(--glass-border) 1px, transparent 1px),
-                              linear-gradient(90deg, var(--glass-border) 1px, transparent 1px);
+                linear-gradient(90deg, var(--glass-border) 1px, transparent 1px);
             background-size: 60px 60px;
             z-index: -1;
             mask-image: radial-gradient(circle at 50% 50%, black 30%, transparent 80%);
@@ -82,8 +86,13 @@
         }
 
         @keyframes floatGlow {
-            0% { transform: translate(-20%, -20%) scale(1); }
-            100% { transform: translate(40%, 30%) scale(1.2); }
+            0% {
+                transform: translate(-20%, -20%) scale(1);
+            }
+
+            100% {
+                transform: translate(40%, 30%) scale(1.2);
+            }
         }
 
         .container {
@@ -203,14 +212,33 @@
         }
 
         /* Card Variations */
-        .card-large { grid-column: span 2; }
-        .card-tall { grid-row: span 2; }
+        .card-large {
+            grid-column: span 2;
+        }
 
-        .card-workflow { background: linear-gradient(rgba(15,23,42,0.4), rgba(15,23,42,0.8)), url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800') center/cover; }
-        .card-studio { background: linear-gradient(rgba(15,23,42,0.4), rgba(15,23,42,0.8)), url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&q=80&w=800') center/cover; }
-        .card-t2i { background: linear-gradient(rgba(15,23,42,0.4), rgba(15,23,42,0.8)), url('https://images.unsplash.com/photo-1633167606207-d840b5070fc2?auto=format&fit=crop&q=80&w=800') center/cover; }
-        .card-i2v { background: linear-gradient(rgba(15,23,42,0.4), rgba(15,23,42,0.8)), url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=800') center/cover; }
-        .card-colab { background: linear-gradient(rgba(15,23,42,0.4), rgba(15,23,42,0.8)), url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800') center/cover; }
+        .card-tall {
+            grid-row: span 2;
+        }
+
+        .card-workflow {
+            background: linear-gradient(rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.8)), url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800') center/cover;
+        }
+
+        .card-studio {
+            background: linear-gradient(rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.8)), url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&q=80&w=800') center/cover;
+        }
+
+        .card-t2i {
+            background: linear-gradient(rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.8)), url('https://images.unsplash.com/photo-1633167606207-d840b5070fc2?auto=format&fit=crop&q=80&w=800') center/cover;
+        }
+
+        .card-i2v {
+            background: linear-gradient(rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.8)), url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=800') center/cover;
+        }
+
+        .card-colab {
+            background: linear-gradient(rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.8)), url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800') center/cover;
+        }
 
         /* --- Stats --- */
         .stats {
@@ -264,8 +292,15 @@
 
         /* --- Animations --- */
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* --- Custom Particle Canvas --- */
@@ -284,14 +319,30 @@
                 grid-template-columns: repeat(2, 1fr);
                 grid-template-rows: auto;
             }
-            .hero h1 { font-size: 64px; }
+
+            .hero h1 {
+                font-size: 64px;
+            }
         }
 
         @media (max-width: 768px) {
-            .nav-links { display: none; }
-            .bento-grid { grid-template-columns: 1fr; }
-            .hero h1 { font-size: 48px; letter-spacing: -2px; }
-            .stats { flex-direction: column; gap: 40px; }
+            .nav-links {
+                display: none;
+            }
+
+            .bento-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 48px;
+                letter-spacing: -2px;
+            }
+
+            .stats {
+                flex-direction: column;
+                gap: 40px;
+            }
         }
     </style>
 </head>
@@ -334,8 +385,9 @@
         <section class="hero">
             <div class="hero-badge">✨ VAX DEV v.1.2 · Now Optimized for 4GB VRAM</div>
             <h1>Revolutionizing AI Video<br>Production at Home.</h1>
-            <p>A comprehensive generative suite designed for local execution. From text-based synthesis to node-based creative control, all powered by our optimized diffusion pipeline.</p>
-            
+            <p>A comprehensive generative suite designed for local execution. From text-based synthesis to node-based
+                creative control, all powered by our optimized diffusion pipeline.</p>
+
             <div class="stats">
                 <div class="stat-item">
                     <span class="stat-value">2.8s</span>
@@ -363,7 +415,8 @@
                 <i class="fas fa-diagram-project card-icon"></i>
                 <div class="card-content">
                     <h3>Studio Flow Pro</h3>
-                    <p>Node-based interface for professional-grade control over every frame, multi-asset blending, and cinematic transitions.</p>
+                    <p>Node-based interface for professional-grade control over every frame, multi-asset blending, and
+                        cinematic transitions.</p>
                 </div>
             </a>
 
@@ -396,63 +449,69 @@
         </div>
 
         <!-- API Section (Placeholder) -->
-        <section id="api" style="padding: 100px 0; text-align: center; background: rgba(139, 92, 246, 0.05); border-radius: 48px; border: 1px dashed var(--glass-border); margin-bottom: 100px;">
-            <i class="fas fa-code-branch" style="font-size: 48px; color: var(--accent-purple); margin-bottom: 24px;"></i>
+        <section id="api"
+            style="padding: 100px 0; text-align: center; background: rgba(139, 92, 246, 0.05); border-radius: 48px; border: 1px dashed var(--glass-border); margin-bottom: 100px;">
+            <i class="fas fa-code-branch"
+                style="font-size: 48px; color: var(--accent-purple); margin-bottom: 24px;"></i>
             <h2 style="font-size: 42px; margin-bottom: 16px;">Enterprise API Access</h2>
-            <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto 32px;">Integrate VAX Studio's generative power into your own applications with our robust REST API.</p>
-            <button class="btn-api" style="background: transparent; border: 1px solid var(--accent-purple); color: var(--accent-purple); box-shadow: none;">Request Keys</button>
+            <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto 32px;">Integrate VAX Studio's
+                generative power into your own applications with our robust REST API.</p>
+            <button class="btn-api"
+                style="background: transparent; border: 1px solid var(--accent-purple); color: var(--accent-purple); box-shadow: none;">Request
+                Keys</button>
         </section>
 
-    <footer class="site-footer">
-        <div class="footer-container">
-            <div class="footer-grid">
-                <div class="footer-brand">
-                    <a href="index.html" class="logo">VAX STUDIO</a>
-                    <p class="footer-tagline">Revolutionizing AI video production with local-first optimized diffusion pipelines.</p>
-                    <div class="footer-socials">
-                        <a href="#" class="social-link"><i class="fab fa-github"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-discord"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+        <footer class="site-footer">
+            <div class="footer-container">
+                <div class="footer-grid">
+                    <div class="footer-brand">
+                        <a href="index.html" class="logo">VAX STUDIO</a>
+                        <p class="footer-tagline">Revolutionizing AI video production with local-first optimized
+                            diffusion pipelines.</p>
+                        <div class="footer-socials">
+                            <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-discord"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                        </div>
+                    </div>
+                    <div class="footer-nav">
+                        <h4 class="footer-title">Products</h4>
+                        <ul class="footer-links">
+                            <li><a href="text2image.html">Text to Image</a></li>
+                            <li><a href="image2video.html">Image to Video</a></li>
+                            <li><a href="studio.html">Studio Flow</a></li>
+                            <li><a href="colab.html">Colab Engine</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-nav">
+                        <h4 class="footer-title">Resources</h4>
+                        <ul class="footer-links">
+                            <li><a href="colab.html">Colab Engine</a></li>
+                            <li><a href="index.html#api">API Documentation</a></li>
+                            <li><a href="#">Support Center</a></li>
+                            <li><a href="#">Community</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-newsletter">
+                        <h4 class="footer-title">Stay Updated</h4>
+                        <p>Get the latest updates on local AI optimization.</p>
+                        <form class="newsletter-form">
+                            <input type="email" placeholder="Email address" class="newsletter-input">
+                            <button type="submit" class="newsletter-btn"><i class="fas fa-paper-plane"></i></button>
+                        </form>
                     </div>
                 </div>
-                <div class="footer-nav">
-                    <h4 class="footer-title">Products</h4>
-                    <ul class="footer-links">
-                        <li><a href="text2image.html">Text to Image</a></li>
-                        <li><a href="image2video.html">Image to Video</a></li>
-                        <li><a href="studio.html">Studio Flow</a></li>
-                        <li><a href="colab.html">Colab Engine</a></li>
-                    </ul>
-                </div>
-                <div class="footer-nav">
-                    <h4 class="footer-title">Resources</h4>
-                    <ul class="footer-links">
-                        <li><a href="colab.html">Colab Engine</a></li>
-                        <li><a href="index.html#api">API Documentation</a></li>
-                        <li><a href="#">Support Center</a></li>
-                        <li><a href="#">Community</a></li>
-                    </ul>
-                </div>
-                <div class="footer-newsletter">
-                    <h4 class="footer-title">Stay Updated</h4>
-                    <p>Get the latest updates on local AI optimization.</p>
-                    <form class="newsletter-form">
-                        <input type="email" placeholder="Email address" class="newsletter-input">
-                        <button type="submit" class="newsletter-btn"><i class="fas fa-paper-plane"></i></button>
-                    </form>
+                <div class="footer-bottom">
+                    <p>© 2026 VAX AI Laboratory. Developed by VAX TEAM.</p>
+                    <div class="footer-legal">
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms of Service</a>
+                        <a href="#">Cookie Settings</a>
+                    </div>
                 </div>
             </div>
-            <div class="footer-bottom">
-                <p>© 2026 VAX AI Laboratory. Developed by VAX TEAM.</p>
-                <div class="footer-legal">
-                    <a href="#">Privacy Policy</a>
-                    <a href="#">Terms of Service</a>
-                    <a href="#">Cookie Settings</a>
-                </div>
-            </div>
-        </div>
-    </footer>
+        </footer>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
