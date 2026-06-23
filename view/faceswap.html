@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Fusion - VAX Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="style.css"> 
+    <style>
+        /* Replikasi style dari image2video.html untuk struktur dasar */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: #03050A; color: #FFFFFF; line-height: 1.6; overflow-x: hidden; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 40px; position: relative; z-index: 10; }
+        
+        /* Navbar */
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 24px 0; margin-bottom: 60px; position: sticky; top: 0; backdrop-filter: blur(12px); background: rgba(10, 12, 21, 0.6); z-index: 100; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .logo { font-size: 24px; font-weight: 900; background: linear-gradient(135deg, #FFFFFF, #A0A0FF, #FF6BFF); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-decoration: none; letter-spacing: -1px; }
+        .nav-links { display: flex; gap: 32px; align-items: center; }
+        .nav-links a { color: rgba(255, 255, 255, 0.8); text-decoration: none; font-weight: 500; font-size: 14px; transition: all 0.3s; }
+        .nav-links a:hover { color: white; }
+        
+        /* Hero Section */
+        .feature-hero { display: flex; gap: 60px; align-items: center; margin-bottom: 80px; padding-top: 40px; }
+        .hero-text { flex: 1; }
+        .hero-text h1 { font-size: 56px; font-weight: 900; line-height: 1.1; margin-bottom: 24px; background: linear-gradient(to bottom, #FFFFFF, #B0B8FF); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero-text p { font-size: 18px; color: rgba(255, 255, 255, 0.7); margin-bottom: 40px; max-width: 600px; }
+        .btn-explore { background: linear-gradient(135deg, #4A4AFF, #9B4DFF); border: none; color: white; padding: 16px 32px; border-radius: 40px; font-weight: 600; font-size: 16px; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 10px; }
+        .btn-explore:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(74, 74, 255, 0.4); }
+        .hero-visual { flex: 1; position: relative; }
+        .hero-video-wrapper { border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: #000; box-shadow: 0 30px 60px rgba(0,0,0,0.5); }
+        .hero-video-wrapper video { width: 100%; display: block; opacity: 0.8; }
+        
+        /* Card & Upload Areas */
+        .card { background: rgba(30, 35, 55, 0.4); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 32px; padding: 50px; margin-bottom: 60px; }
+        .form-group { margin-bottom: 30px; }
+        .form-label { display: block; font-size: 14px; font-weight: 600; color: #A0A0FF; margin-bottom: 12px; letter-spacing: 1px; }
+        
+        .upload-area { border: 2px dashed rgba(255,255,255,0.2); border-radius: 16px; padding: 50px 40px; text-align: center; cursor: pointer; transition: 0.3s; background: rgba(0,0,0,0.2); }
+        .upload-area:hover { border-color: #4A4AFF; background: rgba(74, 74, 255, 0.05); }
+        .upload-area p { margin-top: 15px; color: rgba(255,255,255,0.7); }
+        .upload-area span { display: block; margin-top: 5px; font-size: 12px; color: rgba(255,255,255,0.4); }
+        
+        /* Preview Containers */
+        .preview-container { position: relative; margin-top: 15px; border-radius: 16px; overflow: hidden; display: none; border: 1px solid rgba(255,255,255,0.1); background: #000; }
+        .preview-media { width: 100%; display: block; max-height: 400px; object-fit: contain; }
+        .remove-media-btn { position: absolute; top: 15px; right: 15px; background: rgba(0, 0, 0, 0.7); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; width: 40px; height: 40px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; backdrop-filter: blur(4px); z-index: 10; }
+        .remove-media-btn:hover { background: #ff4a4a; border-color: #ff4a4a; transform: scale(1.1); }
+        
+        /* Layout Grid for inputs */
+        .upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+        @media (max-width: 900px) { .upload-grid { grid-template-columns: 1fr; gap: 20px; } .feature-hero { flex-direction: column; } }
+
+        /* Warnings & Buttons */
+        .vram-warning { display: flex; gap: 20px; background: rgba(255, 170, 0, 0.1); border: 1px solid rgba(255, 170, 0, 0.3); border-radius: 16px; padding: 24px; margin: 40px 0; align-items: flex-start; }
+        .warning-icon { font-size: 24px; }
+        .warning-content strong { color: #FFAA00; display: block; margin-bottom: 5px; font-size: 16px; }
+        .warning-content p { color: rgba(255,255,255,0.7); font-size: 14px; margin: 0; line-height: 1.5; }
+        
+        .btn-generate { width: 100%; background: linear-gradient(135deg, #4A4AFF, #FF4AFF); border: none; color: white; padding: 20px; border-radius: 16px; font-weight: 700; font-size: 18px; cursor: pointer; transition: all 0.3s; display: flex; justify-content: center; align-items: center; gap: 12px; }
+        .btn-generate:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(255, 74, 255, 0.3); }
+        .btn-generate:disabled { opacity: 0.5; cursor: not-allowed; background: #333; box-shadow: none; }
+
+        /* Progress Bar */
+        .progress-card { text-align: center; }
+        .spinner { border: 4px solid rgba(255,255,255,0.1); border-left-color: #4A4AFF; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .progress-bar-container { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; margin-top: 30px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #4A4AFF, #FF4AFF); width: 0%; transition: width 0.3s ease; }
+        
+        /* Video Result Container */
+        #result-container { display: none; margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 40px; text-align: center; }
+        #final-video { width: 100%; max-width: 800px; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); margin: 0 auto 20px; border: 1px solid rgba(255,255,255,0.2); }
+        
+        /* Background Glows */
+        .bg-glow { position: fixed; filter: blur(100px); z-index: -1; pointer-events: none; opacity: 0.4; }
+        .bg-glow-1 { top: -10%; left: -10%; width: 600px; height: 600px; background: #4A4AFF; border-radius: 50%; }
+        .bg-glow-2 { bottom: -10%; right: -10%; width: 500px; height: 500px; background: #FF4AFF; border-radius: 50%; }
+    </style>
+</head>
+<body>
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+    
+    <div class="container">
+        <nav class="navbar">
+            <a href="index.html" class="logo">VAX STUDIO</a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="studio.html">Studio Flow</a>
+                <a href="image2video.html">Image to Video</a>
+                <a href="text2video.html">Text to Video</a>
+                <a href="video2video.html">Video to Video</a>
+                <a href="faceswap.html">Face Swap</a>
+                <a href="facefusion.html" style="color: #FF4AFF;">Face Fusion</a>
+            </div>
+        </nav>
+
+        <main>
+            <section class="feature-hero">
+                <div class="hero-text">
+                    <h1>Face Fusion</h1>
+                    <p>Pertahankan konsistensi identitas subjek di dalam generasi AI Video Anda. Unggah foto wajah referensi murni dan aplikasikan ke video target dengan akurasi struktural tinggi menggunakan pipeline terisolasi.</p>
+                    <button class="btn-explore" onclick="document.getElementById('ff-upload-section').scrollIntoView({behavior:'smooth'})">
+                        <i class="fas fa-arrow-down"></i> Mulai Face Swap
+                    </button>
+                </div>
+                <div class="hero-visual">
+                    <div class="hero-video-wrapper">
+                        <video autoplay loop muted playsinline>
+                            <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" type="video/mp4">
+                        </video>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card" id="ff-upload-section">
+                <div class="upload-grid">
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-user-circle"></i> SOURCE FACE (IMAGE)
+                        </label>
+                        <div class="upload-area" id="source-drop-zone" onclick="document.getElementById('source-upload').click()">
+                            <i class="fas fa-image" style="font-size: 40px; color: #4A4AFF; margin-bottom: 15px;"></i>
+                            <p>Klik atau drag foto wajah referensi</p>
+                            <span>Format: JPG, PNG (Wajah terlihat jelas menghadap depan)</span>
+                            <input type="file" id="source-upload" accept="image/png, image/jpeg, image/webp" style="display: none;" onchange="handleSourceUpload(event)">
+                        </div>
+                        <div class="preview-container" id="source-preview-container">
+                            <img id="source-preview" class="preview-media" src="" alt="Source Face">
+                            <button class="remove-media-btn" onclick="removeSource()" title="Hapus"><i class="fas fa-times"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-film"></i> TARGET VIDEO
+                        </label>
+                        <div class="upload-area" id="target-drop-zone" onclick="document.getElementById('target-upload').click()">
+                            <i class="fas fa-video" style="font-size: 40px; color: #FF4AFF; margin-bottom: 15px;"></i>
+                            <p>Klik atau drag video target</p>
+                            <span>Format: MP4, WEBM (Hasil LTX Video sebelumnya)</span>
+                            <input type="file" id="target-upload" accept="video/mp4, video/webm" style="display: none;" onchange="handleTargetUpload(event)">
+                        </div>
+                        <div class="preview-container" id="target-preview-container">
+                            <video id="target-preview" class="preview-media" controls></video>
+                            <button class="remove-media-btn" onclick="removeTarget()" title="Hapus"><i class="fas fa-times"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="vram-warning">
+                    <div class="warning-icon">⚡</div>
+                    <div class="warning-content">
+                        <strong>Manajemen Memori Otomatis (VRAM 4GB)</strong>
+                        <p>Ketika FaceFusion dijalankan, backend VAX Studio secara otomatis akan melakukan <i>unload</i> terhadap model LTX Video. Ini penting untuk mengalokasikan seluruh VRAM agar proses <i>face mapping</i> berjalan mulus.</p>
+                    </div>
+                </div>
+
+                <button id="generate-btn" class="btn-generate" onclick="generateFaceFusion()">
+                    <i class="fas fa-magic"></i> Proses Face Fusion
+                </button>
+            </section>
+
+            <section id="progress-section" class="card progress-card" style="display:none">
+                <div class="spinner" id="loading-spinner"></div>
+                <h2 id="progress-title" class="card-title" style="font-size: 24px; margin-bottom: 10px;">Mengirim Data...</h2>
+                <p id="progress-text" style="color: rgba(255,255,255,0.6);">Menyiapkan isolasi environment FaceFusion.</p>
+                
+                <div class="progress-bar-container">
+                    <div class="progress-bar">
+                        <div id="progress-fill" class="progress-fill"></div>
+                    </div>
+                </div>
+            </section>
+            
+            <div id="result-container">
+                <h2 style="margin-bottom: 20px; color: #A0A0FF;"><i class="fas fa-check-circle"></i> Fusion Selesai!</h2>
+                <video id="final-video" controls autoplay loop playsinline></video>
+                <br>
+                <a id="download-btn" href="#" download class="btn-explore" style="margin-top: 10px;">
+                    <i class="fas fa-download"></i> Simpan Video
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // API Base URL (Sesuaikan dengan backend FastAPI Anda)
+        const API_BASE_URL = "http://localhost:8000";
+
+        // --- Handle Upload Source Face (Image) ---
+        function handleSourceUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const url = URL.createObjectURL(file);
+                document.getElementById('source-preview').src = url;
+                document.getElementById('source-preview-container').style.display = 'block';
+                document.getElementById('source-drop-zone').style.display = 'none';
+            }
+        }
+
+        function removeSource() {
+            document.getElementById('source-upload').value = '';
+            document.getElementById('source-preview').src = '';
+            document.getElementById('source-preview-container').style.display = 'none';
+            document.getElementById('source-drop-zone').style.display = 'block';
+        }
+
+        // --- Handle Upload Target Video ---
+        function handleTargetUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const url = URL.createObjectURL(file);
+                document.getElementById('target-preview').src = url;
+                document.getElementById('target-preview-container').style.display = 'block';
+                document.getElementById('target-drop-zone').style.display = 'none';
+            }
+        }
+
+        function removeTarget() {
+            document.getElementById('target-upload').value = '';
+            document.getElementById('target-preview').src = '';
+            document.getElementById('target-preview-container').style.display = 'none';
+            document.getElementById('target-drop-zone').style.display = 'block';
+        }
+
+        // --- Main FaceFusion Logic ---
+        async function generateFaceFusion() {
+            const sourceFile = document.getElementById('source-upload').files[0];
+            const targetFile = document.getElementById('target-upload').files[0];
+
+            if (!sourceFile || !targetFile) {
+                alert("Peringatan: Anda harus mengunggah Source Face (Gambar) dan Target Video!");
+                return;
+            }
+
+            // Persiapan UI Progress
+            const btnGenerate = document.getElementById('generate-btn');
+            const progressSection = document.getElementById('progress-section');
+            const resultContainer = document.getElementById('result-container');
+            const progBar = document.getElementById('progress-fill');
+            const progTitle = document.getElementById('progress-title');
+            const progText = document.getElementById('progress-text');
+            
+            btnGenerate.disabled = true;
+            btnGenerate.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Memproses...";
+            progressSection.style.display = 'block';
+            resultContainer.style.display = 'none';
+            progBar.style.width = '10%';
+            
+            const formData = new FormData();
+            formData.append("source_image", sourceFile);
+            formData.append("target_video", targetFile);
+
+            try {
+                // 1. Kirim file ke backend
+                const response = await fetch(`${API_BASE_URL}/generate-facefusion`, {
+                    method: "POST",
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.job_id) {
+                    progTitle.innerText = "Memproses Face Swap...";
+                    progText.innerText = `Job ID: ${data.job_id} | Menunggu FaceFusion CLI...`;
+                    progBar.style.width = '30%';
+                    
+                    // 2. Lakukan polling untuk mengecek status Job
+                    pollJobStatus(data.job_id);
+                } else {
+                    throw new Error(data.detail || data.error || "Gagal masuk antrian");
+                }
+            } catch (error) {
+                console.error("API Error:", error);
+                alert(`Terjadi kesalahan: ${error.message}`);
+                resetUI();
+            }
+        }
+
+        // --- Polling System ---
+        async function pollJobStatus(jobId) {
+            const progBar = document.getElementById('progress-fill');
+            const progText = document.getElementById('progress-text');
+            
+            // Animasi dummy progress bar agar tidak terlihat stuck
+            let currentWidth = 30;
+            const progressInterval = setInterval(() => {
+                if(currentWidth < 90) {
+                    currentWidth += 0.5;
+                    progBar.style.width = `${currentWidth}%`;
+                }
+            }, 1000);
+
+            const checkInterval = setInterval(async () => {
+                try {
+                    const res = await fetch(`${API_BASE_URL}/status/${jobId}`);
+                    const statusData = await res.json();
+
+                    if (statusData.status === "done") {
+                        clearInterval(checkInterval);
+                        clearInterval(progressInterval);
+                        progBar.style.width = '100%';
+                        
+                        setTimeout(() => {
+                            showResult(statusData);
+                        }, 500);
+                        
+                    } else if (statusData.status === "failed") {
+                        clearInterval(checkInterval);
+                        clearInterval(progressInterval);
+                        alert(`Proses gagal: ${statusData.error}`);
+                        resetUI();
+                    } else {
+                        // Masih processing
+                        progText.innerText = "LTX di-unload, mengeksekusi GPU Face Swap...";
+                    }
+                } catch (err) {
+                    console.error("Polling error:", err);
+                }
+            }, 3000); // Cek status setiap 3 detik
+        }
+
+        function showResult(data) {
+            document.getElementById('progress-section').style.display = 'none';
+            const resultContainer = document.getElementById('result-container');
+            const finalVideo = document.getElementById('final-video');
+            const downloadBtn = document.getElementById('download-btn');
+            
+            // Memasang URL video output
+            const videoUrl = `${API_BASE_URL}${data.video_url}`;
+            finalVideo.src = videoUrl;
+            downloadBtn.href = videoUrl;
+            downloadBtn.download = data.filename || "vax_facefusion.mp4";
+            
+            resultContainer.style.display = 'block';
+            resetUI(true);
+        }
+
+        function resetUI(isSuccess = false) {
+            const btnGenerate = document.getElementById('generate-btn');
+            btnGenerate.disabled = false;
+            btnGenerate.innerHTML = "<i class='fas fa-magic'></i> Proses Face Fusion";
+            
+            if (!isSuccess) {
+                document.getElementById('progress-section').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
