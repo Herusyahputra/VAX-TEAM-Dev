@@ -66,6 +66,7 @@ async def _poll_colab_and_download(session, colab_url, colab_job_id, job_id, is_
     download_endpoints = []
     if is_video:
         download_endpoints = [
+            f"/result/{colab_job_id}",
             f"/download/{colab_job_id}/raster",
             status_data_final.get("video_url"),
             status_data_final.get("url"),
@@ -76,6 +77,7 @@ async def _poll_colab_and_download(session, colab_url, colab_job_id, job_id, is_
         ]
     else:
         download_endpoints = [
+            f"/result/{colab_job_id}",
             f"/download/{colab_job_id}/raster",
             status_data_final.get("image_url"),
             status_data_final.get("url"),
@@ -146,7 +148,7 @@ async def _run_image_generation_task(job_id: str, request_data: dict):
         try:
             headers = {"ngrok-skip-browser-warning": "true"}
             async with aiohttp.ClientSession(headers=headers) as session:
-                async with session.post(f"{colab_url}/generate_image", json=request_data) as resp:
+                async with session.post(f"{colab_url}/generate/image", json=request_data) as resp:
                     if resp.status != 200: raise Exception(f"Error Colab: {await resp.text()}")
                     colab_job_id = (await resp.json()).get("job_id")
                     
@@ -180,7 +182,7 @@ async def _run_video_generation_from_image_task(job_id: str, request_data: dict)
         try:
             headers = {"ngrok-skip-browser-warning": "true"}
             async with aiohttp.ClientSession(headers=headers, connector=aiohttp.TCPConnector(limit=10)) as session:
-                async with session.post(f"{colab_url}/generate_video", json=request_data) as resp:
+                async with session.post(f"{colab_url}/generate/video", json=request_data) as resp:
                     if resp.status != 200: raise Exception(f"Error Colab: {await resp.text()}")
                     colab_job_id = (await resp.json()).get("job_id")
                     
@@ -223,6 +225,7 @@ async def queue_video_generation_from_image(job_id: str, request: GenerateVideoF
         "audio_ref": request.audio_ref,
         "prompt": request.prompt or "cinematic video, smooth motion, high quality, 4K",
         "model": request.model,  # "cogvideox" atau "svd"
+        "num_frames": request.num_frames_cog if request.model == "cogvideox" else request.num_frames,
         # SVD params
         "num_frames_svd": request.num_frames,
         "motion_bucket_id": request.motion_bucket_id,
