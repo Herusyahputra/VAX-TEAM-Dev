@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAX STUDIO | The Future of AI Video</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="layout.css">
+    <style>
+        :root {
+            --bg-deep: #030509;
+            --bg-card: rgba(15, 23, 42, 0.6);
+            --accent-purple: #8B5CF6;
+            --accent-pink: #D946EF;
+            --accent-cyan: #06B6D4;
+            --accent-blue: #3B82F6;
+            --text-primary: #F8FAFC;
+            --text-secondary: #94A3B8;
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-glow: rgba(139, 92, 246, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* --- Animated Background --- */
+        .bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: radial-gradient(circle at 0% 0%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 100% 100%, rgba(6, 182, 212, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 1) 0%, var(--bg-deep) 100%);
+        }
+
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(var(--glass-border) 1px, transparent 1px),
+                linear-gradient(90deg, var(--glass-border) 1px, transparent 1px);
+            background-size: 60px 60px;
+            z-index: -1;
+            mask-image: radial-gradient(circle at 50% 50%, black 30%, transparent 80%);
+            opacity: 0.4;
+        }
+
+        .glow-sphere {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, var(--accent-purple) 0%, transparent 70%);
+            filter: blur(100px);
+            opacity: 0.1;
+            z-index: -1;
+            pointer-events: none;
+            animation: floatGlow 20s infinite alternate;
+        }
+
+        @keyframes floatGlow {
+            0% {
+                transform: translate(-20%, -20%) scale(1);
+            }
+
+            100% {
+                transform: translate(40%, 30%) scale(1.2);
+            }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        /* --- Hero --- */
+        .hero {
+            padding: 100px 0 60px;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 100px;
+            color: var(--accent-purple);
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        .hero h1 {
+            font-size: 84px;
+            font-weight: 900;
+            line-height: 0.9;
+            letter-spacing: -4px;
+            margin-bottom: 32px;
+            background: linear-gradient(to bottom, #FFF, #CBD5E1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: fadeInUp 1s ease forwards;
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: var(--text-secondary);
+            max-width: 800px;
+            margin: 0 auto 48px;
+            animation: fadeInUp 1.2s ease forwards;
+        }
+
+        /* --- Bento Grid Features --- */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(2, 300px);
+            gap: 24px;
+            margin-bottom: 100px;
+        }
+
+        .bento-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            padding: 32px;
+            position: relative;
+            overflow: hidden;
+            transition: 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .bento-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(15, 23, 42, 0.9), transparent);
+            z-index: 1;
+        }
+
+        .bento-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent-purple);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5), 0 0 20px rgba(139, 92, 246, 0.2);
+        }
+
+        .card-icon {
+            position: absolute;
+            top: 32px;
+            left: 32px;
+            font-size: 32px;
+            color: var(--accent-purple);
+            z-index: 2;
+            transition: 0.5s;
+        }
+
+        .bento-card:hover .card-icon {
+            transform: scale(1.2) rotate(10deg);
+            color: var(--text-primary);
+        }
+
+        .card-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .card-content h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .card-content p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* Card Variations */
+        .card-large {
+            grid-column: span 2;
+        }
+
+        .card-tall {
+            grid-row: span 2;
+        }
+
+        .card-workflow {
+            background: linear-gradient(rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.8)), url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800') center/cover;
+        }
+
+        .card-studio {
+            background: linear-gradient(rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.8)), url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&q=80&w=800') center/cover;
+        }
+
+        .card-t2i {
+            background: linear-gradient(rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.8)), url('https://images.unsplash.com/photo-1633167606207-d840b5070fc2?auto=format&fit=crop&q=80&w=800') center/cover;
+        }
+
+        .card-i2v {
+            background: linear-gradient(rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.8)), url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=800') center/cover;
+        }
+
+        .card-colab {
+            background: linear-gradient(rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.8)), url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800') center/cover;
+        }
+
+        /* --- Stats --- */
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 80px;
+            padding: 60px 0;
+            border-top: 1px solid var(--glass-border);
+            margin-bottom: 80px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 48px;
+            font-weight: 800;
+            display: block;
+            background: linear-gradient(to bottom, #FFF, var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--accent-purple);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* --- Footer --- */
+        footer {
+            padding: 80px 0 40px;
+            border-top: 1px solid var(--glass-border);
+            text-align: center;
+        }
+
+        .footer-logo {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 24px;
+            display: inline-block;
+        }
+
+        .footer-text {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* --- Animations --- */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- Custom Particle Canvas --- */
+        #particles-js {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        /* --- Mobile Responsiveness --- */
+        @media (max-width: 1024px) {
+            .bento-grid {
+                grid-template-columns: repeat(2, 1fr);
+                grid-template-rows: auto;
+            }
+
+            .hero h1 {
+                font-size: 64px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .bento-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 48px;
+                letter-spacing: -2px;
+            }
+
+            .stats {
+                flex-direction: column;
+                gap: 40px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-canvas"></div>
+    <div class="bg-grid"></div>
+    <div class="glow-sphere"></div>
+    <div id="particles-js"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">VAX STUDIO</a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link" data-page="index">Home</a>
+                <a href="studio.html" class="nav-link" data-page="studio">Studio Flow</a>
+                <a href="text2image.html" class="nav-link" data-page="text2image">Text to Image</a>
+                <a href="image2video.html" class="nav-link" data-page="image2video">Image to Video</a>
+                <a href="colab.html" class="nav-link" data-page="colab">Colab Engine</a>
+            </div>
+            <a href="index.html#api" class="btn-api">
+                <i class="fas fa-key"></i> API Access
+            </a>
+        </div>
+    </nav>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentPage = window.location.pathname.split('/').pop().replace('.html', '') || 'index';
+            document.querySelectorAll('.nav-link').forEach(link => {
+                if (link.getAttribute('data-page') === currentPage) link.classList.add('active');
+            });
+        });
+    </script>
+
+    <div class="container">
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-badge">✨ VAX DEV v.1.2 · Now Optimized for 4GB VRAM</div>
+            <h1>Revolutionizing AI Video<br>Production at Home.</h1>
+            <p>A comprehensive generative suite designed for local execution. From text-based synthesis to node-based
+                creative control, all powered by our optimized diffusion pipeline.</p>
+
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-value">2.8s</span>
+                    <span class="stat-label">Generation Speed</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">4K</span>
+                    <span class="stat-label">Max Resolution</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">4GB</span>
+                    <span class="stat-label">Min VRAM Req.</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">100%</span>
+                    <span class="stat-label">Privacy Focused</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bento Grid Navigation -->
+        <div class="bento-grid">
+            <!-- Studio Flow -->
+            <a href="studio.html" class="bento-card card-large card-studio">
+                <i class="fas fa-diagram-project card-icon"></i>
+                <div class="card-content">
+                    <h3>Studio Flow Pro</h3>
+                    <p>Node-based interface for professional-grade control over every frame, multi-asset blending, and
+                        cinematic transitions.</p>
+                </div>
+            </a>
+
+            <!-- Text to Image -->
+            <a href="text2image.html" class="bento-card card-t2i">
+                <i class="fas fa-pen-nib card-icon"></i>
+                <div class="card-content">
+                    <h3>Text to Image</h3>
+                    <p>Transform detailed descriptions into stunning 4K visuals instantly.</p>
+                </div>
+            </a>
+
+            <!-- Image to Video -->
+            <a href="image2video.html" class="bento-card card-large card-i2v">
+                <i class="fas fa-film card-icon"></i>
+                <div class="card-content">
+                    <h3>Image to Video</h3>
+                    <p>Breathe life into static images with AI-driven temporal consistency and motion synthesis.</p>
+                </div>
+            </a>
+
+            <!-- Colab Engine -->
+            <a href="colab.html" class="bento-card card-colab">
+                <i class="fas fa-server card-icon"></i>
+                <div class="card-content">
+                    <h3>Colab Engine</h3>
+                    <p>Bridge to high-performance cloud compute for heavy-duty batch processing.</p>
+                </div>
+            </a>
+        </div>
+
+        <!-- API Section (Placeholder) -->
+        <section id="api"
+            style="padding: 100px 0; text-align: center; background: rgba(139, 92, 246, 0.05); border-radius: 48px; border: 1px dashed var(--glass-border); margin-bottom: 100px;">
+            <i class="fas fa-code-branch"
+                style="font-size: 48px; color: var(--accent-purple); margin-bottom: 24px;"></i>
+            <h2 style="font-size: 42px; margin-bottom: 16px;">Enterprise API Access</h2>
+            <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto 32px;">Integrate VAX Studio's
+                generative power into your own applications with our robust REST API.</p>
+            <button class="btn-api"
+                style="background: transparent; border: 1px solid var(--accent-purple); color: var(--accent-purple); box-shadow: none;">Request
+                Keys</button>
+        </section>
+
+        <footer class="site-footer">
+            <div class="footer-container">
+                <div class="footer-grid">
+                    <div class="footer-brand">
+                        <a href="index.html" class="logo">VAX STUDIO</a>
+                        <p class="footer-tagline">Revolutionizing AI video production with local-first optimized
+                            diffusion pipelines.</p>
+                        <div class="footer-socials">
+                            <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-discord"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                        </div>
+                    </div>
+                    <div class="footer-nav">
+                        <h4 class="footer-title">Products</h4>
+                        <ul class="footer-links">
+                            <li><a href="text2image.html">Text to Image</a></li>
+                            <li><a href="image2video.html">Image to Video</a></li>
+                            <li><a href="studio.html">Studio Flow</a></li>
+                            <li><a href="colab.html">Colab Engine</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-nav">
+                        <h4 class="footer-title">Resources</h4>
+                        <ul class="footer-links">
+                            <li><a href="colab.html">Colab Engine</a></li>
+                            <li><a href="index.html#api">API Documentation</a></li>
+                            <li><a href="#">Support Center</a></li>
+                            <li><a href="#">Community</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-newsletter">
+                        <h4 class="footer-title">Stay Updated</h4>
+                        <p>Get the latest updates on local AI optimization.</p>
+                        <form class="newsletter-form">
+                            <input type="email" placeholder="Email address" class="newsletter-input">
+                            <button type="submit" class="newsletter-btn"><i class="fas fa-paper-plane"></i></button>
+                        </form>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>© 2026 VAX AI Laboratory. Developed by VAX TEAM.</p>
+                    <div class="footer-legal">
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms of Service</a>
+                        <a href="#">Cookie Settings</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script>
+        // Initialize Particles.js
+        if (typeof particlesJS !== 'undefined') {
+            particlesJS('particles-js', {
+                "particles": {
+                    "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
+                    "color": { "value": "#8B5CF6" },
+                    "shape": { "type": "circle" },
+                    "opacity": { "value": 0.2, "random": false },
+                    "size": { "value": 3, "random": true },
+                    "line_linked": { "enable": true, "distance": 150, "color": "#8B5CF6", "opacity": 0.1, "width": 1 },
+                    "move": { "enable": true, "speed": 2, "direction": "none", "random": false, "straight": false, "out_mode": "out", "bounce": false }
+                },
+                "interactivity": {
+                    "detect_on": "canvas",
+                    "events": { "onhover": { "enable": true, "mode": "grab" }, "onclick": { "enable": true, "mode": "push" }, "resize": true },
+                    "modes": { "grab": { "distance": 140, "line_linked": { "opacity": 1 } }, "push": { "particles_nb": 4 } }
+                },
+                "retina_detect": true
+            });
+        }
+
+        // Smooth reveal on scroll
+        const observerOptions = { threshold: 0.1 };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = "1";
+                    entry.target.style.transform = "translateY(0)";
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.bento-card').forEach(card => {
+            card.style.opacity = "0";
+            card.style.transform = "translateY(40px)";
+            card.style.transition = "all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1)";
+            observer.observe(card);
+        });
+    </script>
+</body>
+
+</html>

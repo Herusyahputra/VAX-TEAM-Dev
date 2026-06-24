@@ -10,7 +10,7 @@ echo  ============================================================
 echo.
 
 :: Cek apakah virtual environment ada
-if not exist "venv\Scripts\python.exe" (
+if not exist ".venv\Scripts\python.exe" (
     echo  [ERROR] Virtual environment tidak ditemukan!
     echo  Buat dulu dengan menjalankan: setup.bat
     echo.
@@ -20,11 +20,11 @@ if not exist "venv\Scripts\python.exe" (
 
 :: Aktifkan venv
 echo  [1/3] Mengaktifkan virtual environment...
-call venv\Scripts\activate.bat
+call .venv\Scripts\activate.bat
 
 :: Set VRAM optimization untuk 4GB
-echo  [2/3] Setting optimasi VRAM 4GB...y
-set PYTORCH_CUDA_ALLOC_CONF=max_splYit_size_mb:128
+echo  [2/3] Setting optimasi VRAM 4GB...
+set PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:128
 set HF_HUB_ENABLE_HF_TRANSFER=1
 
 :: Jalankan server
@@ -33,11 +33,12 @@ echo.
 echo  ============================================================
 echo   Server  : http://localhost:8000
 echo   API Docs: http://localhost:8000/docs
-echo   Frontend: Buka frontend\index.html di browser
+echo   Frontend: Buka app\view\index.html di browser
 echo  ============================================================
 echo.
 
-cd backend
-python main.py
+python -m app.main
 
 pause
+
+ 

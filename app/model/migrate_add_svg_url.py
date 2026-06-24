@@ -1,0 +1,51 @@
+"""
+Migration: Add svg_url column to jobs table
+Run once: python migrate_add_svg_url.py
+"""
+import sys, io
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+import pymysql
+
+from app.core.config import settings
+from sqlalchemy.engine.url import make_url
+
+url = make_url(settings.DB_URL)
+conn = pymysql.connect(
+    host=url.host or 'localhost',
+    port=url.port or 3306,
+    user=url.username or 'root',
+    password=url.password or '',
+    database=url.database or 'vax_dev',
+    charset='utf8mb4'
+)
+cur = conn.cursor()
+
+try:
+    db_name = url.database or 'vax_dev'
+    # Cek apakah kolom sudah ada
+    cur.execute("""
+        SELECT COUNT(*) FROM information_schema.COLUMNS
+        WHERE TABLE_SCHEMA = %s
+          AND TABLE_NAME   = 'jobs'
+          AND COLUMN_NAME  = 'svg_url'
+    """, (db_name,))
+    exists = cur.fetchone()[0]
+
+    if exists:
+        print("[OK] Kolom 'svg_url' sudah ada -- tidak perlu migrasi.")
+    else:
+        cur.execute("""
+            ALTER TABLE jobs
+            ADD COLUMN svg_url VARCHAR(255) NULL
+            COMMENT 'SVG vector output URL'
+            AFTER video_url
+        """)
+        conn.commit()
+        print("[OK] Migration sukses! Kolom 'svg_url' berhasil ditambahkan ke tabel 'jobs'.")
+
+except Exception as e:
+    conn.rollback()
+    print(f"[ERROR] Migration gagal: {e}")
+finally:
+    cur.close()
+    conn.close()

@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAX STUDIO | Generation Analytics Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="layout.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --accent-gradient: linear-gradient(135deg, #8B5CF6 0%, #D946EF 100%);
+            --success-gradient: linear-gradient(135deg, #10B981 0%, #3B82F6 100%);
+            --warning-gradient: linear-gradient(135deg, #F59E0B 0%, #EF4444 100%);
+        }
+
+        .analytics-header {
+            padding: 80px 0 60px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+            transition: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(139, 92, 246, 0.4);
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            color: var(--accent-purple);
+            font-size: 18px;
+        }
+
+        .stat-val {
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 4px;
+            font-family: 'Outfit', sans-serif;
+            color: #fff;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+        }
+
+        .stat-trend {
+            margin-top: 15px;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .trend-up { color: #10B981; }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .content-box {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            padding: 35px;
+        }
+
+        .box-title {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* --- Custom Chart --- */
+        .chart-wrapper {
+            padding: 20px 0;
+        }
+
+        .bar-group {
+            margin-bottom: 25px;
+        }
+
+        .bar-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .bar-container {
+            height: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 100px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 100px;
+            width: 0;
+            transition: width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* --- Error List --- */
+        .error-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            background: rgba(239, 68, 68, 0.05);
+            border: 1px solid rgba(239, 68, 68, 0.1);
+            border-radius: 16px;
+            margin-bottom: 12px;
+            font-size: 13px;
+        }
+        .error-msg { color: #f87171; font-weight: 500; }
+        .error-count { font-weight: 800; opacity: 0.6; }
+
+        /* --- Table --- */
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .history-table th {
+            text-align: left;
+            padding: 15px;
+            border-bottom: 1px solid var(--glass-border);
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .history-table td {
+            padding: 18px 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            font-size: 13px;
+        }
+
+        .status-pill {
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+        .pill-done { background: rgba(16, 185, 129, 0.1); color: #10B981; }
+        .pill-failed { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+        .pill-processing { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+
+        @keyframes countUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-canvas"></div>
+    
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">VAX STUDIO</a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="studio.html" class="nav-link">Studio Flow</a>
+                <a href="text2image.html" class="nav-link">Text to Image</a>
+                <a href="image2video.html" class="nav-link">Image to Video</a>
+                <a href="report.html" class="nav-link active">Analytics</a>
+            </div>
+            <a href="colab.html" class="btn-api">
+                <i class="fas fa-server"></i> Engine status
+            </a>
+        </div>
+    </nav>
+
+    <div class="container" style="max-width: 1200px; margin: 0 auto;">
+        <header class="analytics-header">
+            <div>
+                <h1 style="font-size: 54px; letter-spacing: -3px; margin-bottom: 12px; background: linear-gradient(to bottom, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Pipeline Intelligence</h1>
+                <p style="color: var(--text-secondary); font-weight: 500; font-size: 18px;">Comprehensive data visualization of VAX Studio generation metrics.</p>
+            </div>
+            <div style="display: flex; gap: 15px; justify-content: center;">
+                <button onclick="refreshData()" class="btn-api" style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); padding: 12px 24px;">
+                    <i class="fas fa-sync"></i> Refresh Analytics Data
+                </button>
+            </div>
+        </header>
+
+        <div class="report-grid">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-bolt"></i></div>
+                <div class="stat-val" id="total-jobs">0</div>
+                <div class="stat-label">Total Jobs</div>
+                <div class="stat-trend trend-up"><i class="fas fa-arrow-up"></i> <span id="recent-jobs">0</span> in last 24h</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="color: #10B981;"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-val" id="success-rate">0%</div>
+                <div class="stat-label">Success Rate</div>
+                <div class="stat-trend" style="opacity:0.5;">Optimized Performance</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="color: #3B82F6;"><i class="fas fa-clock"></i></div>
+                <div class="stat-val" id="avg-time">0s</div>
+                <div class="stat-label">Avg. Duration</div>
+                <div class="stat-trend" style="opacity:0.5;">Based on last 50 tasks</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="color: #D946EF;"><i class="fas fa-spinner fa-spin"></i></div>
+                <div class="stat-val" id="active-jobs">0</div>
+                <div class="stat-label">Active Tasks</div>
+                <div class="stat-trend" style="opacity:0.5;">Currently in pipeline</div>
+            </div>
+        </div>
+
+        <h2 class="box-title" style="margin-bottom: 25px;"><i class="fas fa-film" style="color: var(--accent-cyan);"></i> Video Engine Performance</h2>
+        <div class="report-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 40px;">
+            <div class="stat-card" style="padding: 24px;">
+                <div class="stat-val" id="video-success" style="font-size: 32px; background: linear-gradient(to right, #FFF, var(--accent-cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">0%</div>
+                <div class="stat-label" style="font-size: 10px;">Video Success Rate</div>
+            </div>
+            <div class="stat-card" style="padding: 24px;">
+                <div class="stat-val" id="video-avg" style="font-size: 32px; background: linear-gradient(to right, #FFF, var(--accent-blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">0s</div>
+                <div class="stat-label" style="font-size: 10px;">Avg. Video Gen Time</div>
+            </div>
+            <div class="stat-card" style="padding: 24px;">
+                <div class="stat-val" id="video-total" style="font-size: 32px; background: linear-gradient(to right, #FFF, var(--accent-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">0</div>
+                <div class="stat-label" style="font-size: 10px;">Total Videos Created</div>
+            </div>
+        </div>
+
+        <div class="main-layout">
+            <div class="content-box">
+                <h2 class="box-title"><i class="fas fa-chart-line"></i> Generation Activity (Last 7 Days)</h2>
+                <div class="chart-wrapper" style="height: 300px;">
+                    <canvas id="weekly-chart"></canvas>
+                </div>
+            </div>
+            <div class="content-box">
+                <h2 class="box-title"><i class="fas fa-exclamation-circle"></i> Error Distribution</h2>
+                <div class="chart-wrapper" style="height: 220px;">
+                    <canvas id="error-doughnut"></canvas>
+                </div>
+                <div id="error-list" style="margin-top: 20px; font-size: 11px;">
+                    <!-- Error details -->
+                </div>
+            </div>
+        </div>
+
+        <div class="content-box" style="margin-bottom: 40px; background: linear-gradient(135deg, rgba(15,23,42,0.9) 0%, rgba(139,92,246,0.05) 100%);">
+            <h2 class="box-title"><i class="fas fa-microscope"></i> How it Works: Latent Seed Processing</h2>
+            <div style="display: grid; grid-template-columns: 1fr 40px 1fr 40px 1fr; gap: 10px; padding: 20px 0; text-align: center; align-items: center;">
+                <!-- Step 1 -->
+                <div class="step-card">
+                    <div style="height: 100px; background: rgba(0,0,0,0.4); border-radius: 16px; margin-bottom: 15px; position: relative; overflow: hidden; border: 1px solid var(--glass-border);">
+                        <canvas id="canvas-seed" style="width:100%; height:100%;"></canvas>
+                    </div>
+                    <div style="font-weight: 800; font-size: 14px; margin-bottom: 5px; color: var(--accent-purple);">1. Seed Noise</div>
+                    <p style="font-size: 11px; color: var(--text-secondary);">Basis angka acak (Seed) diubah menjadi noise di ruang laten.</p>
+                </div>
+                <div style="opacity: 0.3;"><i class="fas fa-chevron-right"></i></div>
+                <!-- Step 2 -->
+                <div class="step-card">
+                    <div style="height: 100px; background: rgba(0,0,0,0.4); border-radius: 16px; margin-bottom: 15px; position: relative; overflow: hidden; border: 1px solid var(--glass-border);">
+                        <canvas id="canvas-denoise" style="width:100%; height:100%;"></canvas>
+                    </div>
+                    <div style="font-weight: 800; font-size: 14px; margin-bottom: 5px; color: var(--accent-blue);">2. Denoising</div>
+                    <p style="font-size: 11px; color: var(--text-secondary);">Model menghapus noise sesuai instruksi teks (Prompt).</p>
+                </div>
+                <div style="opacity: 0.3;"><i class="fas fa-chevron-right"></i></div>
+                <!-- Step 3 -->
+                <div class="step-card">
+                    <div style="height: 100px; background: rgba(0,0,0,0.4); border-radius: 16px; margin-bottom: 15px; position: relative; overflow: hidden; border: 1px solid var(--glass-border);">
+                        <canvas id="canvas-decode" style="width:100%; height:100%;"></canvas>
+                    </div>
+                    <div style="font-weight: 800; font-size: 14px; margin-bottom: 5px; color: var(--accent-cyan);">3. VAE Decode</div>
+                    <p style="font-size: 11px; color: var(--text-secondary);">Data laten diubah menjadi piksel video yang tajam.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-box" style="margin-bottom: 80px;">
+            <h2 class="box-title"><i class="fas fa-history"></i> Detailed Job History</h2>
+            <div style="overflow-x: auto;">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Job ID</th>
+                            <th>Pipeline</th>
+                            <th>Resolution</th>
+                            <th>Status</th>
+                            <th>Duration</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-body">
+                        <!-- Loaded via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://127.0.0.1:8000';
+
+        async function refreshData() {
+            loadStats();
+            loadHistory();
+        }
+
+        async function loadStats() {
+            try {
+                const res = await fetch(`${API}/jobs/stats`);
+                const data = await res.json();
+                
+                // Fallback values if API returns null/undefined
+                const total = data.total || 0;
+                const success = data.success || 0;
+                const failed = data.failed || 0;
+                const recent = data.recent_24h || 0;
+                const avg = data.avg_duration || 0;
+                const breakdown = data.breakdown || { image: 0, video: 0 };
+                const errors = data.errors || [];
+
+                // Animate counts
+                animateVal('total-jobs', total);
+                animateVal('recent-jobs', recent);
+                animateVal('active-jobs', data.active || 0);
+                
+                // Video Specific Metrics
+                if (data.video_metrics) {
+                    document.getElementById('video-success').textContent = data.video_metrics.success_rate + '%';
+                    document.getElementById('video-avg').textContent = data.video_metrics.avg_duration + 's';
+                    animateVal('video-total', data.video_metrics.total);
+                }
+                
+                const rate = total > 0 ? Math.round((success / total) * 100) : 0;
+                document.getElementById('success-rate').textContent = rate + '%';
+                document.getElementById('avg-time').textContent = avg + 's';
+                
+                // Build Weekly Activity Chart (Chart.js)
+                renderChart(data.weekly_activity || {});
+
+                // Build Error Doughnut Chart
+                renderErrorChart(data.errors || []);
+
+                // Build Error List
+                const errList = document.getElementById('error-list');
+                if (errors.length === 0) {
+                    errList.innerHTML = '<div style="text-align:center; padding: 20px; opacity:0.3;">No errors recorded. System stable.</div>';
+                } else {
+                    errList.innerHTML = errors.slice(0, 3).map(err => `
+                        <div class="error-item">
+                            <span class="error-msg" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;">${err.msg}</span>
+                            <span class="error-count">${err.count}x</span>
+                        </div>
+                    `).join('');
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function loadHistory() {
+            try {
+                const res = await fetch(`${API}/jobs/history?limit=15`);
+                const data = await res.json();
+                const body = document.getElementById('history-body');
+                
+                body.innerHTML = data.jobs.map(job => {
+                    const date = new Date(job.created_at).toLocaleString();
+                    return `
+                    <tr>
+                        <td style="font-family: monospace; font-weight: 700; color: var(--accent-purple)">${job.id}</td>
+                        <td>
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <div style="width:24px; height:24px; border-radius:6px; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center;">
+                                    <i class="fas fa-${job.type === 'image' ? 'image' : 'video'}" style="font-size:10px;"></i>
+                                </div>
+                                <span style="font-weight:600;">${job.type.toUpperCase()}</span>
+                            </div>
+                        </td>
+                        <td style="opacity:0.6;">${job.width}x${job.height}</td>
+                        <td><span class="status-pill pill-${job.status}">${job.status}</span></td>
+                        <td style="font-weight:700;">${job.duration_seconds ? job.duration_seconds + 's' : '—'}</td>
+                        <td style="font-size:11px; opacity:0.4;">${date}</td>
+                    </tr>
+                    `;
+                }).join('');
+            } catch (e) { console.error(e); }
+        }
+
+        function animateVal(id, target) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            if (target === 0 || !target || isNaN(target)) {
+                el.textContent = '0';
+                return;
+            }
+            let current = 0;
+            const inc = target / 30;
+            const timer = setInterval(() => {
+                current += inc;
+                if (current >= target) {
+                    el.textContent = Math.round(target);
+                    clearInterval(timer);
+                } else {
+                    el.textContent = Math.round(current);
+                }
+            }, 30);
+        }
+
+        let myChart = null;
+        function renderChart(weeklyData) {
+            const ctx = document.getElementById('weekly-chart').getContext('2d');
+            const labels = Object.keys(weeklyData).sort();
+            const imgData = labels.map(l => weeklyData[l].image || 0);
+            const vidData = labels.map(l => weeklyData[l].video || 0);
+
+            if (myChart) myChart.destroy();
+
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Images',
+                            data: imgData,
+                            borderColor: '#8B5CF6',
+                            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Videos',
+                            data: vidData,
+                            borderColor: '#3B82F6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#94A3B8', font: { family: 'Plus Jakarta Sans' } } }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true, 
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#94A3B8' }
+                        },
+                        x: { 
+                            grid: { display: false },
+                            ticks: { color: '#94A3B8' }
+                        }
+                    }
+                }
+            });
+        }
+        
+        let errorChart = null;
+        function renderErrorChart(errors) {
+            const ctx = document.getElementById('error-doughnut').getContext('2d');
+            if (errorChart) errorChart.destroy();
+            
+            if (errors.length === 0) return;
+
+            errorChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: errors.map(e => e.msg),
+                    datasets: [{
+                        data: errors.map(e => e.count),
+                        backgroundColor: ['#ef4444', '#f59e0b', '#8B5CF6', '#3B82F6', '#06B6D4'],
+                        borderWidth: 0,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        function initCanvases() {
+            // 1. Seed Noise Canvas
+            const cSeed = document.getElementById('canvas-seed');
+            const ctxSeed = cSeed.getContext('2d');
+            function drawSeed() {
+                const imageData = ctxSeed.createImageData(cSeed.width, cSeed.height);
+                for (let i = 0; i < imageData.data.length; i += 4) {
+                    const v = Math.random() * 255;
+                    imageData.data[i] = v;
+                    imageData.data[i+1] = v;
+                    imageData.data[i+2] = v;
+                    imageData.data[i+3] = 50;
+                }
+                ctxSeed.putImageData(imageData, 0, 0);
+                requestAnimationFrame(drawSeed);
+            }
+            drawSeed();
+
+            // 2. Denoising Canvas
+            const cDenoise = document.getElementById('canvas-denoise');
+            const ctxDenoise = cDenoise.getContext('2d');
+            let offset = 0;
+            function drawDenoise() {
+                ctxDenoise.clearRect(0,0,cDenoise.width, cDenoise.height);
+                for(let i=0; i<50; i++) {
+                    ctxDenoise.fillStyle = `rgba(59, 130, 246, ${Math.random() * 0.5})`;
+                    ctxDenoise.fillRect(Math.random()*cDenoise.width, (Math.sin(offset + i)*20) + 40, 2, 2);
+                }
+                offset += 0.05;
+                requestAnimationFrame(drawDenoise);
+            }
+            drawDenoise();
+
+            // 3. Decode Canvas
+            const cDecode = document.getElementById('canvas-decode');
+            const ctxDecode = cDecode.getContext('2d');
+            function drawDecode() {
+                ctxDecode.fillStyle = 'rgba(0,0,0,0.1)';
+                ctxDecode.fillRect(0,0,cDecode.width, cDecode.height);
+                for(let i=0; i<5; i++) {
+                    ctxDecode.strokeStyle = `rgba(6, 182, 212, ${Math.random()})`;
+                    ctxDecode.strokeRect(Math.random()*cDecode.width, Math.random()*cDecode.height, 10, 10);
+                }
+                requestAnimationFrame(drawDecode);
+            }
+            drawDecode();
+        }
+
+        window.onload = () => {
+            loadStats();
+            loadHistory();
+            initCanvases();
+            
+            // Real-time Update: Refresh stats every 10 seconds
+            setInterval(() => {
+                console.log("Real-time Analytics Update...");
+                loadStats();
+            }, 10000);
+            
+            // Refresh history every 30 seconds
+            setInterval(() => {
+                loadHistory();
+            }, 30000);
+        };
+    </script>
+</body>
+</html>

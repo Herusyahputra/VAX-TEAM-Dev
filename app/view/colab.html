@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Colab Engine - VAX Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="layout.css">
+    <style>
+        .colab-hero {
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        .colab-card {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto 40px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+        }
+
+        .engine-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .status-pill {
+            padding: 8px 20px;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .status-offline {
+            background: rgba(239, 68, 68, 0.1);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .status-online {
+            background: rgba(34, 197, 94, 0.1);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .vram-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .vram-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            transition: 0.5s;
+        }
+
+        .url-input-box {
+            display: flex;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .url-input {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px 20px;
+            color: #fff;
+            font-family: inherit;
+        }
+
+        .url-input:focus {
+            border-color: var(--accent-purple);
+            outline: none;
+        }
+
+        .guide-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            text-align: left;
+            margin-top: 40px;
+        }
+
+        .guide-item {
+            background: rgba(255, 255, 255, 0.02);
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .guide-num {
+            width: 30px;
+            height: 30px;
+            background: var(--accent-purple);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-canvas"></div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">VAX STUDIO</a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link" data-page="index">Home</a>
+                <a href="studio.html" class="nav-link" data-page="studio">Studio Flow</a>
+                <a href="text2image.html" class="nav-link" data-page="text2image">Text to Image</a>
+                <a href="image2video.html" class="nav-link" data-page="image2video">Image to Video</a>
+                <a href="colab.html" class="nav-link" data-page="colab">Colab Engine</a>
+            </div>
+            <a href="index.html#api" class="btn-api">
+                <i class="fas fa-key"></i> API Access
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <main>
+            <section class="colab-hero">
+                <div class="hero-badge">CLOUD ACCELERATION</div>
+                <h1 style="font-size: 48px; font-weight: 900; margin-bottom: 16px;">Colab Engine v3.3</h1>
+                <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto 40px;">
+                    Hubungkan VAX Studio ke Google Colab (GPU T4) untuk render video kualitas tinggi tanpa menggunakan
+                    GPU lokal Anda.
+                </p>
+
+                <div class="colab-card">
+                    <div class="engine-status">
+                        <div id="status-pill" class="status-pill status-offline">
+                            <i class="fas fa-circle-notch fa-spin"></i> Checking Connection
+                        </div>
+                    </div>
+
+                    <div id="vram-monitor" style="margin-bottom: 30px; display: none;">
+                        <div
+                            style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary);">
+                            <span>GPU VRAM USAGE</span>
+                            <span id="vram-text">0.0 / 15.0 GiB</span>
+                        </div>
+                        <div class="vram-bar">
+                            <div id="vram-fill" class="vram-fill"></div>
+                        </div>
+                    </div>
+
+                    <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 10px;">Masukan URL Ngrok
+                        dari Colab Anda:</p>
+                    <div class="url-input-box">
+                        <input type="text" id="colab-url" class="url-input"
+                            placeholder="https://xxxx-xx.ngrok-free.app">
+                        <button class="btn-generate" style="margin-top:0;" onclick="connectEngine()">
+                            <i class="fas fa-link"></i> Connect
+                        </button>
+                    </div>
+                    <p id="current-url-display" style="font-size: 11px; color: rgba(255,255,255,0.3);">URL Saat Ini:
+                        Tidak terdeteksi</p>
+                </div>
+
+                <div class="guide-grid">
+                    <div class="guide-item">
+                        <div class="guide-num">1</div>
+                        <h4 style="margin-bottom:8px;">Buka Colab</h4>
+                        <p style="font-size:13px; color:var(--text-secondary);">Salin dan jalankan kode dari file
+                            <code>app/model/setup_environment.py</code> (v3.3) ke Google Colab. Pastikan Runtime disetel
+                            ke GPU (T4).</p>
+                    </div>
+                    <div class="guide-item">
+                        <div class="guide-num">2</div>
+                        <h4 style="margin-bottom:8px;">Copy Ngrok URL</h4>
+                        <p style="font-size:13px; color:var(--text-secondary);">Tunggu hingga muncul pesan "ONLINE" di
+                            Colab, lalu salin URL yang berakhiran <code>.ngrok-free.app</code>.</p>
+                    </div>
+                    <div class="guide-item">
+                        <div class="guide-num">3</div>
+                        <h4 style="margin-bottom:8px;">Hubungkan</h4>
+                        <p style="font-size:13px; color:var(--text-secondary);">Tempel URL di kotak di atas dan klik
+                            Connect. Status akan berubah menjadi hijau jika berhasil.</p>
+                    </div>
+                    <div class="guide-item">
+                        <div class="guide-num">4</div>
+                        <h4 style="margin-bottom:8px;">Generate</h4>
+                        <p style="font-size:13px; color:var(--text-secondary);">Sekarang Anda bisa menggunakan model
+                            CogVideoX-5B yang haus VRAM melalui Colab Engine.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="index.html" class="logo">VAX STUDIO</a>
+                    <p class="footer-tagline">Masa depan produksi video AI dengan model lokal yang dioptimalkan.</p>
+                </div>
+                <div class="footer-nav">
+                    <h4 class="footer-title">Products</h4>
+                    <ul class="footer-links">
+                        <li><a href="text2image.html">Text to Image</a></li>
+                        <li><a href="image2video.html">Image to Video</a></li>
+                        <li><a href="studio.html">Studio Flow</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2026 VAX AI Laboratory. Developed by VAX TEAM.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const LOCAL_API = "http://127.0.0.1:8000";
+
+        async function updateStatus() {
+            try {
+                const res = await fetch(`${LOCAL_API}/model/status`);
+                const data = await res.json();
+ 
+                const pill = document.getElementById('status-pill');
+                const vramBox = document.getElementById('vram-monitor');
+                const urlDisplay = document.getElementById('current-url-display');
+ 
+                if (data.status === "ok" && data.colab_url) {
+                    pill.className = "status-pill status-online";
+                    pill.innerHTML = '<i class="fas fa-check-circle"></i> Engine Connected';
+                    urlDisplay.textContent = `URL Terhubung: ${data.colab_url}`;
+ 
+                    if (data.vram_info) {
+                        vramBox.style.display = "block";
+                        document.getElementById('vram-text').textContent = data.vram_info;
+                        
+                        // Parse VRAM percentage correctly
+                        const used = parseFloat(data.vram_info.split('/')[0]);
+                        const total = parseFloat(data.vram_info.split('/')[1]);
+                        const pct = (used / total) * 100;
+                        document.getElementById('vram-fill').style.width = pct + '%';
+                    } else {
+                        vramBox.style.display = "none";
+                    }
+                } else {
+                    pill.className = "status-pill status-offline";
+                    pill.innerHTML = `<i class="fas fa-times-circle"></i> ${data.message || 'Engine Disconnected'}`;
+                    urlDisplay.textContent = data.colab_url ? `URL Terdaftar: ${data.colab_url}` : "Belum ada URL terdaftar";
+                    vramBox.style.display = "none";
+                }
+            } catch (e) {
+                document.getElementById('status-pill').className = "status-pill status-offline";
+                document.getElementById('status-pill').innerHTML = '<i class="fas fa-plug"></i> Local Server Offline';
+            }
+        }
+
+        async function connectEngine() {
+            const url = document.getElementById('colab-url').value.trim();
+            if (!url) { alert("Input URL dulu!"); return; }
+
+            try {
+                const res = await fetch(`${LOCAL_API}/model/set-colab-url`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ url: url })
+                });
+                const d = await res.json();
+                if (d.success) {
+                    alert("Berhasil terhubung ke Engine!");
+                    updateStatus();
+                }
+            } catch (e) {
+                alert("Gagal menghubungi server lokal.");
+            }
+        }
+
+        setInterval(updateStatus, 5000);
+        window.onload = updateStatus;
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image to Video - VAX Studio v3.4</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="layout.css">
+    <style>
+        .feature-hero {
+            padding: 40px 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .hero-visual {
+            position: relative;
+        }
+
+        .hero-video-wrapper {
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+            background: #000;
+            aspect-ratio: 16/9;
+        }
+
+        .hero-video-wrapper video,
+        .hero-video-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Model Selector */
+        .model-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .model-card {
+            padding: 16px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.02);
+            cursor: pointer;
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .model-card.active {
+            border-color: var(--accent-purple);
+            background: rgba(139, 92, 246, 0.1);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
+        }
+
+        .model-card h4 {
+            margin: 0 0 4px 0;
+            font-size: 15px;
+        }
+
+        .model-card p {
+            margin: 0;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .model-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .model-card.active .model-badge {
+            background: var(--accent-purple);
+        }
+
+        .drop-zone {
+            border: 2px dashed rgba(139, 92, 246, 0.2);
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            background: rgba(139, 92, 246, 0.01);
+            transition: 0.3s;
+            cursor: pointer;
+            margin-bottom: 24px;
+            position: relative;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .drop-zone:hover {
+            border-color: var(--accent-purple);
+            background: rgba(139, 92, 246, 0.03);
+        }
+
+        .drop-zone img {
+            max-height: 180px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .prompt-container {
+            margin-bottom: 24px;
+            display: none;
+            /* Only for CogVideoX */
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .progress-section {
+            display: none;
+            margin-top: 24px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .progress-bar-bg {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 12px 0;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue));
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-canvas"></div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">VAX STUDIO</a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link" data-page="index">Home</a>
+                <a href="studio.html" class="nav-link" data-page="studio">Studio Flow</a>
+                <a href="text2image.html" class="nav-link" data-page="text2image">Text to Image</a>
+                <a href="image2video.html" class="nav-link" data-page="image2video">Image to Video</a>
+                <a href="colab.html" class="nav-link" data-page="colab">Colab Engine</a>
+            </div>
+            <a href="index.html#api" class="btn-api">
+                <i class="fas fa-key"></i> API Access
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <main>
+            <section class="feature-hero">
+                <div class="hero-text">
+                    <div class="hero-badge">VAX ENGINE V4.0</div>
+                    <h1>Image to Video</h1>
+                    <p>Ubah gambar statis menjadi mahakarya sinematik. Pilih model sesuai kebutuhan Anda: SVD untuk
+                        gerakan natural, atau CogVideoX untuk kontrol prompt penuh.</p>
+                    <div id="status-badge" class="status-badge status-checking" style="margin-top: 20px;">
+                        <span class="status-icon">⏳</span>
+                        <span id="status-text">Connecting to VAX Engine...</span>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <div class="hero-video-wrapper" id="main-preview-container">
+                        <video id="hero-video" autoplay loop muted playsinline>
+                            <source src="asset/tovideo.mp4"
+                                type="video/mp4">
+                        </video>
+                        <img id="hero-img-preview" style="display:none;">
+                    </div>
+                </div>
+            </section>
+
+            <section class="card">
+                <div class="model-selector">
+                    <div class="model-card active" onclick="selectModel('cogvideox')" id="model-cog">
+                        <span class="model-badge">HQ</span>
+                        <h4>CogVideoX-5B</h4>
+                        <p>Kualitas tinggi + Kontrol Prompt</p>
+                    </div>
+                    <div class="model-card" onclick="selectModel('svd')" id="model-svd">
+                        <span class="model-badge">Fast</span>
+                        <h4>SVD-XT</h4>
+                        <p>Gerakan natural, tanpa prompt</p>
+                    </div>
+                </div>
+
+                <div class="drop-zone" id="drop-zone">
+                    <div id="drop-content">
+                        <i class="fas fa-image"
+                            style="font-size: 40px; color: var(--accent-purple); margin-bottom: 16px;"></i>
+                        <h3>Upload Source Image</h3>
+                        <p style="color: var(--text-secondary);">Drag & drop gambar (PNG/JPG)</p>
+                    </div>
+                    <img id="upload-preview" style="display:none;">
+                    <input type="file" id="image-input" hidden accept="image/*">
+                </div>
+
+                <div class="prompt-container" id="cog-prompt-box" style="display: block;">
+                    <label class="form-label">Video Prompt (Optional)</label>
+                    <textarea id="video-prompt" class="form-input" style="min-height: 100px;"
+                        placeholder="Deskripsikan gerakan video, misal: 'A beautiful woman smiling, soft lighting, 4k cinematic'"></textarea>
+                </div>
+                <div class="settings-grid"
+                    style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Resolution (VRAM Optimized)</label>
+                        <select id="video-res" class="form-select">
+                            <option value="384x224">384p Low (384×224) - Ultra Fast</option>
+                            <option value="480x272" selected>480p Balanced (480×272) - Recommended</option>
+                            <option value="640x384">640p Cinematic (640×384) - High Quality</option>
+                            <option value="720x480">DVD HQ (720×480) - Heavy VRAM</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Duration (Frames)</label>
+                        <select id="video-frames" class="form-input">
+                            <option value="9">Very Short (9f)</option>
+                            <option value="17" selected>Standard (17f)</option>
+                            <option value="25">Long (25f)</option>
+                            <option value="33">Max Stable (33f)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label class="form-label">Background Audio (Optional)</label>
+                    <div class="drop-zone" id="audio-drop-zone" style="min-height: 80px; padding: 15px; border-style: dotted;">
+                        <div id="audio-drop-content">
+                            <i class="fas fa-music" style="color: #10B981; margin-right: 10px;"></i>
+                            <span id="audio-file-name" style="font-size: 13px; color: var(--text-secondary);">Click to upload audio/music</span>
+                        </div>
+                        <input type="file" id="audio-input" hidden accept="audio/*">
+                    </div>
+                </div>
+
+                <div class="settings-grid" id="svd-settings" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">Motion Bucket Id</label>
+                        <input type="number" id="motion-id" class="form-input" value="127">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Noise Aug</label>
+                        <input type="number" step="0.01" id="noise-aug" class="form-input" value="0.02">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Seed (-1 = Random)</label>
+                        <input type="number" id="video-seed" class="form-input" value="-1">
+                    </div>
+                </div>
+
+                <button class="btn-generate" id="gen-btn" style="width: 100%; margin-top: 10px;"
+                    onclick="generateVideo()">
+                    <i class="fas fa-bolt"></i> Generate Video
+                </button>
+
+                <!-- Debug Button -->
+                <button onclick="document.getElementById('detailed-result').style.display='block'" 
+                        style="width: 100%; margin-top: 10px; background: none; border: 1px dashed rgba(255,255,255,0.1); color: rgba(255,255,255,0.3); font-size: 10px; cursor: pointer;">
+                    DEBUG: Force Show Result Section
+                </button>
+
+                <div class="progress-section" id="progress-box">
+                    <div style="display: flex; justify-content: space-between; font-size: 14px;">
+                        <span id="progress-status">Initializing...</span>
+                        <span id="progress-pct">0%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" id="progress-fill"></div>
+                    </div>
+                </div>
+
+                <div id="result-actions" style="display: none; margin-top: 20px;">
+                    <a id="download-link" href="#" class="btn-api"
+                        style="display: block; text-align: center; text-decoration: none; background: rgba(139, 92, 246, 0.2); border: 1px solid var(--accent-purple);">
+                        <i class="fas fa-download"></i> Download Video
+                    </a>
+                </div>
+            </section>
+
+            <!-- Detailed Video Result Card -->
+            <section id="detailed-result" class="card"
+                style="display: none; margin-top: 30px; border-color: rgba(217, 70, 239, 0.3); animation: fadeInUp 0.6s ease;">
+                <h3 style="font-size: 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-film" style="color: var(--accent-pink);"></i> Generation Result
+                </h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                    <div style="border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); aspect-ratio: 16/9; background: #000; position: relative;">
+                        <video id="final-res-video" style="width: 100%; display: block;" autoplay loop controls></video>
+                        <div id="svg-container" style="display: none; position: absolute; bottom: 40px; right: 10px;">
+                            <a id="download-svg-link" href="#" download class="btn-api" style="font-size: 12px; padding: 6px 12px; background: rgba(16, 185, 129, 0.8); border: 1px solid #10b981; color: #fff; text-decoration: none; border-radius: 8px; backdrop-filter: blur(4px);">
+                                <i class="fas fa-vector-square"></i> Get Animated Vector (.svg)
+                            </a>
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; justify-content: center;">
+                        <div class="form-group" style="margin-bottom: 20px;">
+                            <label class="form-label" style="opacity: 0.5;">SOURCE PROMPT</label>
+                            <div id="res-prompt-text"
+                                style="padding: 15px; background: rgba(0,0,0,0.3); border-radius: 12px; font-size: 14px; line-height: 1.6; border: 1px solid rgba(255,255,255,0.05); color: #e2e8f0; font-style: italic;">
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                            <div
+                                style="padding: 12px; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                                <span style="display: block; font-size: 10px; color: var(--text-secondary); text-transform: uppercase;">Model</span>
+                                <span id="res-model" style="color: #fff; font-weight: bold;">-</span>
+                            </div>
+                            <div
+                                style="padding: 12px; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                                <span style="display: block; font-size: 10px; color: var(--text-secondary); text-transform: uppercase;">Resolution</span>
+                                <span id="res-dim" style="color: #fff;">-</span>
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                            <div
+                                style="padding: 12px; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                                <span style="display: block; font-size: 10px; color: var(--text-secondary); text-transform: uppercase;">Frames</span>
+                                <span id="res-frames" style="color: #fff;">-</span>
+                            </div>
+                            <div
+                                style="padding: 12px; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                                <span style="display: block; font-size: 10px; color: var(--text-secondary); text-transform: uppercase;">Seed</span>
+                                <span id="res-seed" style="font-family: monospace; color: #fff;">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recent Video Gallery -->
+            <section style="margin-top: 50px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2 style="font-size: 24px; font-weight: 800;">Recent Videos</h2>
+                    <button onclick="loadHistory()" class="btn-api" style="padding: 8px 16px; font-size: 12px; background: rgba(255,255,255,0.05);">
+                        <i class="fas fa-sync"></i> Refresh Gallery
+                    </button>
+                </div>
+                <div class="gallery-scroll-container" id="video-gallery" 
+                     style="display: flex; gap: 20px; overflow-x: auto; padding-bottom: 20px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;">
+                    <!-- Videos will load here -->
+                </div>
+                <style>
+                    .gallery-scroll-container::-webkit-scrollbar { height: 6px; }
+                    .gallery-scroll-container::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 10px; }
+                    .gallery-scroll-container::-webkit-scrollbar-thumb { background: var(--accent-pink); border-radius: 10px; }
+                    .history-card {
+                        flex: 0 0 320px;
+                        scroll-snap-align: start;
+                        transition: transform 0.3s ease, border-color 0.3s ease;
+                        cursor: pointer;
+                        background: rgba(255,255,255,0.02);
+                        border: 1px solid rgba(255,255,255,0.05);
+                        border-radius: 16px;
+                        padding: 12px;
+                    }
+                    .history-card:hover {
+                        transform: translateY(-5px);
+                        border-color: var(--accent-pink);
+                        background: rgba(217, 70, 239, 0.05);
+                    }
+                    .history-meta-tag {
+                        font-size: 9px;
+                        background: rgba(0,0,0,0.3);
+                        padding: 2px 6px;
+                        border-radius: 4px;
+                        color: var(--text-secondary);
+                        border: 1px solid rgba(255,255,255,0.05);
+                    }
+                </style>
+            </section>
+        </main>
+    </div>
+
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="index.html" class="logo">VAX STUDIO</a>
+                    <p class="footer-tagline">Masa depan produksi video AI dengan model lokal yang dioptimalkan.</p>
+                </div>
+                <div class="footer-nav">
+                    <h4 class="footer-title">Products</h4>
+                    <ul class="footer-links">
+                        <li><a href="text2image.html">Text to Image</a></li>
+                        <li><a href="image2video.html">Image to Video</a></li>
+                        <li><a href="studio.html">Studio Flow</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2026 VAX AI Laboratory. Developed by VAX TEAM.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const API = 'http://127.0.0.1:8000';
+        let selectedModel = 'cogvideox';
+        let base64Image = null;
+        let base64Audio = null;
+        let pollTimer = null;
+
+        // Check Connection
+        async function checkServer() {
+            try {
+                const r = await fetch(`${API}/model/status`);
+                const d = await r.json();
+                document.getElementById('status-badge').className = 'status-badge status-online';
+                document.getElementById('status-text').textContent = 'Engine Online v3.4';
+            } catch {
+                document.getElementById('status-badge').className = 'status-badge status-offline';
+                document.getElementById('status-text').textContent = 'Server Offline';
+            }
+        }
+
+        window.onload = () => {
+            checkServer();
+            loadHistory();
+        };
+
+        async function loadHistory() {
+            try {
+                const res = await fetch(`${API}/jobs/history?limit=12`);
+                const data = await res.json();
+                const gallery = document.getElementById('video-gallery');
+                gallery.innerHTML = '';
+
+                data.jobs.filter(j => j.type === 'video' && j.status === 'done').forEach(job => {
+                    const card = document.createElement('div');
+                    card.className = 'history-card';
+                    card.onclick = () => {
+                        document.getElementById('video-prompt').value = job.prompt || '';
+                        window.scrollTo({ top: 400, behavior: 'smooth' });
+                    };
+                    card.innerHTML = `
+                        <div style="border-radius: 12px; overflow: hidden; aspect-ratio: 16/9; margin-bottom: 12px; background: #000; border: 1px solid rgba(255,255,255,0.05);">
+                            <video src="${API}${job.video_url}" style="width:100%; height:100%; object-fit: cover;" muted onmouseover="this.play()" onmouseout="this.pause()"></video>
+                        </div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px;">
+                            <span class="history-meta-tag">${job.model ? job.model.toUpperCase() : 'AI'}</span>
+                            <span class="history-meta-tag">${job.num_frames}F</span>
+                            <span class="history-meta-tag">${job.width}x${job.height}</span>
+                            <span class="history-meta-tag">Seed: ${job.seed}</span>
+                        </div>
+                        <p style="font-size: 11px; color: var(--text-primary); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 10px; opacity: 0.8;">
+                            ${job.prompt || 'Generated Video'}
+                        </p>
+                        <a href="${API}${job.video_url}" download class="btn-api" 
+                           onclick="event.stopPropagation()"
+                           style="display: block; text-align: center; font-size: 10px; padding: 6px; text-decoration: none; background: rgba(255,255,255,0.05);">
+                            <i class="fas fa-download"></i> Raster Video (.mp4)
+                        </a>
+                        ${job.svg_url ? `
+                        <a href="${API}${job.svg_url}" download class="btn-api" 
+                           onclick="event.stopPropagation()"
+                           style="display: block; text-align: center; font-size: 10px; padding: 6px; margin-top: 4px; text-decoration: none; background: rgba(16, 185, 129, 0.05); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2);">
+                            <i class="fas fa-vector-square"></i> Animated Vector (.svg)
+                        </a>
+                        ` : ''}
+                    `;
+                    gallery.appendChild(card);
+                });
+            } catch (e) { console.error('History Error:', e); }
+        }
+
+        // Model Selection
+        function selectModel(m) {
+            selectedModel = m;
+            document.getElementById('model-cog').classList.toggle('active', m === 'cogvideox');
+            document.getElementById('model-svd').classList.toggle('active', m === 'svd');
+            document.getElementById('cog-prompt-box').style.display = m === 'cogvideox' ? 'block' : 'none';
+            document.getElementById('svd-settings').style.display = m === 'svd' ? 'grid' : 'none';
+        }
+
+        // Image Handling
+        const fileInput = document.getElementById('image-input');
+        const uploadPreview = document.getElementById('upload-preview');
+        const dropContent = document.getElementById('drop-content');
+        const dropZone = document.getElementById('drop-zone');
+
+        dropZone.onclick = () => fileInput.click();
+        fileInput.onchange = (e) => handleFile(e.target.files[0]);
+
+        function handleFile(file) {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                base64Image = e.target.result.split(',')[1];
+                uploadPreview.src = e.target.result;
+                uploadPreview.style.display = 'block';
+                dropContent.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Audio Handling
+        const audioInput = document.getElementById('audio-input');
+        const audioDropZone = document.getElementById('audio-drop-zone');
+        const audioFileName = document.getElementById('audio-file-name');
+
+        audioDropZone.onclick = () => audioInput.click();
+        audioInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            audioFileName.textContent = file.name;
+            audioFileName.style.color = '#10B981';
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                base64Audio = ev.target.result.split(',')[1];
+            };
+            reader.readAsDataURL(file);
+        };
+
+        // Generate Logic
+        async function generateVideo() {
+            if (!base64Image) { alert('Upload gambar dulu!'); return; }
+            
+            const btn = document.getElementById('gen-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            document.getElementById('progress-box').style.display = 'block';
+            document.getElementById('detailed-result').style.display = 'none';
+
+            const resVal = document.getElementById('video-res').value.split('x');
+            const frames = parseInt(document.getElementById('video-frames').value);
+            const prompt = document.getElementById('video-prompt').value;
+
+            const payload = {
+                image_base64: base64Image,
+                model: selectedModel,
+                prompt: prompt,
+                width: parseInt(resVal[0]),
+                height: parseInt(resVal[1]),
+                num_frames: frames, 
+                num_frames_cog: frames,
+                motion_bucket_id: parseInt(document.getElementById('motion-id').value) || 127,
+                noise_aug_strength: parseFloat(document.getElementById('noise-aug').value) || 0.02,
+                audio_ref: base64Audio,
+                seed: document.getElementById('video-seed') ? (parseInt(document.getElementById('video-seed').value) || -1) : -1
+            };
+
+            try {
+                const res = await fetch(`${API}/jobs/generate_video`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.job_id) pollStatus(data.job_id, prompt, `${resVal[0]}x${resVal[1]}`, selectedModel, frames);
+            } catch (e) {
+                alert('Error: ' + e.message);
+                resetUI();
+            }
+        }
+
+        function pollStatus(id, prompt, resolution, model, frames) {
+            pollTimer = setInterval(async () => {
+                try {
+                    const res = await fetch(`${API}/jobs/status/${id}`);
+                    const data = await res.json();
+                    
+                    const pct = data.progress || 0;
+                    document.getElementById('progress-fill').style.width = pct + '%';
+                    document.getElementById('progress-pct').textContent = pct + '%';
+                    document.getElementById('progress-status').textContent = data.status === 'processing' ? 'Synthesizing Frames...' : 'Encoding...';
+
+                    if (data.status === 'done') {
+                        clearInterval(pollTimer);
+                        showResult(data, prompt, resolution, model, frames);
+                    } else if (data.status === 'failed') {
+                        clearInterval(pollTimer);
+                        alert('Generate Failed: ' + data.error);
+                        resetUI();
+                    }
+                } catch {}
+            }, 1500);
+        }
+
+        function showResult(data, prompt, resolution, model, frames) {
+            const videoUrl = `${API}${data.video_url}`;
+            
+            // Hero Video update
+            const heroVideo = document.getElementById('hero-video');
+            heroVideo.src = videoUrl;
+            heroVideo.load();
+            
+            // Detailed result update
+            const finalVideo = document.getElementById('final-res-video');
+            finalVideo.src = videoUrl;
+            document.getElementById('res-prompt-text').textContent = prompt || "Image to Video Generation";
+            document.getElementById('res-model').textContent = model.toUpperCase();
+            document.getElementById('res-dim').textContent = resolution;
+            document.getElementById('res-frames').textContent = frames || '-';
+            document.getElementById('res-seed').textContent = data.seed || 'N/A';
+            
+            document.getElementById('detailed-result').style.display = 'block';
+            document.getElementById('download-link').href = videoUrl;
+            
+            const svgContainer = document.getElementById('svg-container');
+            if (data.svg_url) {
+                if (svgContainer) {
+                    svgContainer.style.display = 'block';
+                    document.getElementById('download-svg-link').href = `${API}${data.svg_url}`;
+                }
+            } else if (svgContainer) {
+                svgContainer.style.display = 'none';
+            }
+            
+            document.getElementById('result-actions').style.display = 'block';
+            
+            loadHistory();
+            document.getElementById('detailed-result').scrollIntoView({ behavior: 'smooth' });
+            resetUI();
+        }
+
+        function resetUI() {
+            const btn = document.getElementById('gen-btn');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-bolt"></i> Generate Video';
+            document.getElementById('progress-box').style.display = 'none';
+        }
+    </script>
+</body>
+
+</html>

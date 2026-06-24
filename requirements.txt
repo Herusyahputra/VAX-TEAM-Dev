@@ -1,14 +1,66 @@
+# ============================================================
+# VAX Studio DEV v1.2 — Local Server Dependencies
+# ============================================================
+# This file covers ONLY what the local FastAPI server needs.
+# AI models (torch, diffusers, etc.) run on Google Colab/Kaggle
+# and are NOT required on this machine.
+#
+# Install: pip install -r requirements.txt
+# ============================================================
+
+
+# --- Web Framework ---
 fastapi==0.115.0
 uvicorn==0.30.0
-python-multipart==0.0.9
-diffusers>=0.30.0
-transformers>=4.44.0
-accelerate>=0.33.0
-torch>=2.4.0
-sentencepiece
-protobuf
-huggingface_hub
-bitsandbytes>=0.43.0
-aiofiles
-python-dotenv
-opencv-python
+starlette==0.38.6
+python-multipart==0.0.9      # Required for form/file upload handling
+
+
+# --- Database (MySQL Async) ---
+SQLAlchemy==2.0.49
+aiomysql==0.3.2               # Async MySQL driver (used by SQLAlchemy async engine)
+PyMySQL==1.1.2                # Sync MySQL driver (used at startup to auto-create database)
+greenlet==3.4.0               # Required by SQLAlchemy async
+
+
+# --- HTTP Client (to communicate with Colab/Kaggle engine) ---
+aiohttp==3.13.5               # Async HTTP client used in ai_service.py
+requests==2.33.1              # Sync HTTP client used in model_controller.py
+
+
+# --- Configuration & Validation ---
+pydantic==2.13.3
+pydantic-settings==2.14.0
+pydantic_core==2.46.3
+python-dotenv==1.2.2
+annotated-types==0.7.0
+
+
+# --- System Monitoring (Terminal Stats) ---
+psutil==7.2.2                 # CPU & RAM monitoring in monitor.py
+nvidia-ml-py3==7.352.0        # GPU monitoring (optional, gracefully skipped if unavailable)
+
+
+# --- aiohttp Internal Dependencies ---
+aiosignal==1.3.1
+aiohappyeyeballs==2.6.1
+frozenlist==1.5.0
+multidict==6.1.0
+yarl==1.18.3
+propcache==0.4.1
+attrs==24.3.0
+
+
+# --- requests Internal Dependencies ---
+certifi==2026.2.25
+charset-normalizer==3.4.7
+idna==3.12
+urllib3==2.6.3
+
+
+# --- uvicorn / FastAPI Internal Dependencies ---
+anyio==4.13.0
+h11==0.16.0
+click==8.3.2
+colorama==0.4.6
+typing_extensions==4.15.0

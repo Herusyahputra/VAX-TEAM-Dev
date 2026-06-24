@@ -1,0 +1,171 @@
+/* footer.css - Unified Footer Styles for VAX STUDIO */
+.site-footer {
+    background: rgba(3, 5, 9, 0.95);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 80px 0 40px;
+    margin-top: 100px;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: #94A3B8;
+}
+
+.footer-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 40px;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1.5fr;
+    gap: 60px;
+    margin-bottom: 60px;
+}
+
+.footer-brand .logo {
+    font-size: 24px;
+    font-weight: 900;
+    margin-bottom: 20px;
+    display: inline-block;
+}
+
+.footer-tagline {
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 24px;
+    max-width: 300px;
+}
+
+.footer-socials {
+    display: flex;
+    gap: 16px;
+}
+
+.social-link {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94A3B8;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.social-link:hover {
+    background: rgba(139, 92, 246, 0.1);
+    color: #FFF;
+    border-color: rgba(139, 92, 246, 0.3);
+    transform: translateY(-3px);
+}
+
+.footer-title {
+    color: #F8FAFC;
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 24px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-links li {
+    margin-bottom: 12px;
+}
+
+.footer-links a {
+    color: #94A3B8;
+    text-decoration: none;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+.footer-links a:hover {
+    color: #8B5CF6;
+    padding-left: 4px;
+}
+
+.footer-newsletter p {
+    font-size: 14px;
+    margin-bottom: 16px;
+}
+
+.newsletter-form {
+    display: flex;
+    gap: 10px;
+}
+
+.newsletter-input {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 10px 16px;
+    color: #FFF;
+    font-size: 13px;
+    width: 100%;
+}
+
+.newsletter-btn {
+    background: #8B5CF6;
+    color: #FFF;
+    border: none;
+    border-radius: 10px;
+    width: 40px;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.newsletter-btn:hover {
+    background: #7C3AED;
+    transform: scale(1.05);
+}
+
+.footer-bottom {
+    padding-top: 40px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+}
+
+.footer-legal {
+    display: flex;
+    gap: 24px;
+}
+
+.footer-legal a {
+    color: #64748B;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.footer-legal a:hover {
+    color: #94A3B8;
+}
+
+@media (max-width: 1024px) {
+    .footer-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+    }
+}
+
+@media (max-width: 640px) {
+    .footer-grid {
+        grid-template-columns: 1fr;
+    }
+    .footer-bottom {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+    }
+}
